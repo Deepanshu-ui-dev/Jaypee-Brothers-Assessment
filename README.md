@@ -1,70 +1,88 @@
-# FinTrack 💰
+# FinTrack: Premium Personal Finance Tracker
 
-A complete, production-ready Flutter personal finance tracker application
-featuring a clean, minimal "zero-elevation" UI system. Built with modern Flutter
-best practices.
+FinTrack is a sophisticated, high-performance Flutter application designed to
+provide a premium personal finance tracking experience. Built with a focus on
+fluid UI, high-impact design, and robust state management, it offers a
+zero-elevation aesthetic with advanced theme awareness.
 
-## Features ✨
+## ✨ Features
 
-- **Zero-Elevation UI**: A premium, clean visual design with no shadows or
-  excessive cards.
-- **Firebase Authentication**: Full email/pass login, register, and forgot
-  password flow.
-- **Firestore Database**: Real-time syncing and offline persistence for
-  transactions and categories.
-- **Riverpod State Management**: Robust, boilerplate-reduced dependency and
-  state management.
-- **Analytics & Charts**: Detailed category breakdown and 6-month visual
-  spending bar charts via `fl_chart`.
-- **Categorization**: Manage both income and expense categories with custom
-  icons and tint colors.
-- **CSV Export**: Export all transactions to CSV for external use.
-- **Biometric Lock Support**: UI placeholders ready for `local_auth`
-  integration.
-- **Dark Mode Support**: Complete theming tokens implemented for both light and
-  dark aesthetics.
+- **Premium UI/UX**: Overlapping Bento-style dashboard, glassmorphic navigation
+  bar, and vibrant emerald gradients.
+- **Micro-Animations**: Elastic splash transitions, pulsing primary actions, and
+  smooth context-aware animations.
+- **Smart Analytics**: Monthly spending breakdown, automated daily insights, and
+  interactive bar charts.
+- **Theme-Aware Architecture**: 100% reactive typography and icon tints that
+  adapt instantly to Light and Dark modes.
+- **Robust Transaction Management**: Categorized spending, income tracking, and
+  real-time balance calculations.
+- **Persistence & Security**: Offline-first data persistence via Firestore
+  caching and secure authentication.
 
-## Tech Stack 🛠️
+## 🛠️ Tech Stack
 
-- **Framework**: Flutter 3.x
-- **State Management**: `flutter_riverpod`
-- **Routing**: `go_router`
-- **Backend**: Firebase (Auth & Firestore)
-- **Charts**: `fl_chart`
-- **Typography**: `google_fonts` (Plus Jakarta Sans & DM Mono)
+- **Framework**: [Flutter](https://flutter.dev/) (SDK 3.22.0+)
+- **State Management**: [Riverpod](https://riverpod.dev/) (Functional &
+  Reactive)
+- **Navigation**: [GoRouter](https://pub.dev/packages/go_router) (Declarative
+  Routing)
+- **Database**:
+  [Firebase Cloud Firestore](https://firebase.google.com/docs/firestore) (with
+  offline caching)
+- **Typography**: [Google Fonts](https://fonts.google.com/) (Plus Jakarta Sans)
+- **Utilities**: Environment variable management via `flutter_dotenv`.
 
-## Setup & Execution 🚀
+## 🚀 Getting Started
 
-1. **Firebase Configuration**:
-   - Create a project in the
-     [Firebase Console](https://console.firebase.google.com/).
-   - Enable **Authentication** (Email/Password).
-   - Enable **Firestore Database** and update security rules.
-   - Add Android/iOS apps to the Firebase project and download
-     `google-services.json` / `GoogleService-Info.plist` respectively.
+### Prerequisites
 
-2. **Environment Variables**:
-   - Copy `.env.example` to `.env` and fill in your specific application IDs or
-     keys if required (most Firebase config is handled by the `google-services`
-     files natively).
+- Flutter SDK (latest stable)
+- Java Development Kit (JDK) 17+
+- Android Studio / VS Code
 
-3. **Run Application**:
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Deepanshu-ui-dev/Jaypee-Brothers-Assessment-.git
+   cd Fintracker
+   ```
+
+2. **Install dependencies**:
    ```bash
    flutter pub get
+   ```
+
+3. **Environment Setup**: Create a `.env` file in the root directory and add
+   your Firebase configurations if applicable (refer to `.env.example`).
+
+4. **Firebase Configuration**: Ensure your `google-services.json` (Android) and
+   `GoogleService-Info.plist` (iOS) are correctly placed in their respective
+   platform directories.
+
+5. **Run the application**:
+   ```bash
    flutter run
    ```
 
-## Architecture 🏗️
+## 📂 Project Structure
 
-The project uses a clean layer-by-layer structure:
+```text
+lib/
+├── app/          # Navigation & Central Theme
+├── core/         # Extensions, Colors, Styles, Constants
+├── data/         # Models, Repositories, Services
+├── presentation/ # Screens, Widgets, Fragments
+└── providers/    # Riverpod Logic & Business State
+```
 
-- `lib/core/` - Constants, design system, extensions, utilities.
-- `lib/data/` - Models, Repositories (Firestore), Services.
-- `lib/providers/` - Riverpod state notifiers and providers.
-- `lib/presentation/` - UI screens, structured by feature (auth, dashboard,
-  transactions, etc.).
+## 📦 Deployment Note
 
-## Note
+The project has been sanitized for submission. Hardcoded secrets have been moved
+to environment variables, and the repository follows a semantic commit history
+for clarity and professional auditing.
 
-Ensure the correct packages are pre-installed and internet connection is active
-on initial test device run to download Google Fonts properly.
+---
+
+**Developed with ❤️ by Deepanshu Kaushik**
