@@ -61,6 +61,23 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     Center(
                       child: Column(
                         children: [
+                          Container(
+                            width: 64, height: 64,
+                            decoration: BoxDecoration(
+                              gradient: context.colors.balanceCardGradient,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.colors.primary.withAlpha(60),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 8),
+                                )
+                              ],
+                            ),
+                            child: const Icon(Icons.lock_reset_rounded,
+                                color: Colors.white, size: 30),
+                          ),
+                          const SizedBox(height: 20),
                           Text('Reset password', style: context.textStyles.heading.copyWith(fontSize: 26)),
                           const SizedBox(height: 8),
                           Text("Enter your email and we'll send you a reset link.",

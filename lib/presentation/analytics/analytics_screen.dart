@@ -70,7 +70,7 @@ class AnalyticsScreen extends ConsumerWidget {
                       final vsLabel = _comparisonLabel(expense, prevExp, isPct: true);
                       final isDown = expense <= prevExp;
                       return _StatPill(
-                        title: 'This Month',
+                        title: 'Total Expenses',
                         value: expense.asCurrency,
                         subtitle: vsLabel,
                         icon: Icons.credit_card_rounded,

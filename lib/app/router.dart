@@ -230,28 +230,179 @@ class _FloatingAddButtonState extends State<_FloatingAddButton>
           backgroundColor: context.colors.surface,
           isScrollControlled: true,
           shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-          builder: (_) => const AddEditTransactionSheet(),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+          builder: (ctx) => _ChooseMethodSheet(),
         );
       },
       child: ScaleTransition(
         scale: _scale,
         child: Container(
-          width: 48,
-          height: 48,
+          width: 52,
+          height: 52,
           decoration: BoxDecoration(
             color: context.colors.primary,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: context.colors.primary.withAlpha(60),
-                blurRadius: 12,
+                color: context.colors.primary.withAlpha(80),
+                blurRadius: 16,
                 spreadRadius: 2,
-                offset: const Offset(0, 2),
+                offset: const Offset(0, 4),
               )
             ],
           ),
           child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Choose Method Sheet ────────────────────────────────────────────────────
+
+class _ChooseMethodSheet extends StatelessWidget {
+  const _ChooseMethodSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: context.colors.divider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Choose Method',
+              style: context.textStyles.heading.copyWith(fontSize: 20),
+            ),
+            const SizedBox(height: 20),
+            _MethodRow(
+              icon: Icons.edit_rounded,
+              iconBg: const Color(0xFF3B6BE4),
+              title: 'Enter Manually',
+              subtitle: 'Input your expense details manually',
+              onTap: () {
+                Navigator.of(context).pop();
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: context.colors.surface,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+                  builder: (_) => const AddEditTransactionSheet(),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _MethodRow(
+              icon: Icons.picture_as_pdf_rounded,
+              iconBg: const Color(0xFFFF7E3E),
+              title: 'PDF Receipt',
+              subtitle: 'Upload a PDF receipt of your transaction details',
+              comingSoon: true,
+            ),
+            const SizedBox(height: 12),
+            _MethodRow(
+              icon: Icons.image_rounded,
+              iconBg: const Color(0xFFB13BE4),
+              title: 'Upload Image',
+              subtitle: 'Upload an image of your transaction details',
+              comingSoon: true,
+            ),
+            const SizedBox(height: 12),
+            _MethodRow(
+              icon: Icons.camera_alt_rounded,
+              iconBg: const Color(0xFF0CA75B),
+              title: 'Snap Receipt',
+              subtitle: 'Quickly capture expense details with your camera',
+              comingSoon: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MethodRow extends StatelessWidget {
+  const _MethodRow({
+    required this.icon,
+    required this.iconBg,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+    this.comingSoon = false,
+  });
+
+  final IconData icon;
+  final Color iconBg;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final bool comingSoon;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: comingSoon ? null : onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: context.colors.pageBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.colors.divider, width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: context.textStyles.bodyMedium),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: context.textStyles.caption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ),
+            if (comingSoon) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF5656).withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Coming soon',
+                  style: context.textStyles.label.copyWith(
+                    color: const Color(0xFFFF5656),
+                    fontSize: 9,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

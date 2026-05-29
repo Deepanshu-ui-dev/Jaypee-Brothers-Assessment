@@ -63,13 +63,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Logo
                     Center(
                       child: Container(
-                        width: 56, height: 56,
+                        width: 64, height: 64,
                         decoration: BoxDecoration(
-                          color: context.colors.ink,
-                          borderRadius: BorderRadius.circular(16),
+                          gradient: context.colors.balanceCardGradient,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: context.colors.primary.withAlpha(60),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            )
+                          ],
                         ),
-                        child: Icon(Icons.account_balance_wallet_rounded,
-                            color: context.colors.onInk, size: 28),
+                        child: const Icon(Icons.account_balance_wallet_rounded,
+                            color: Colors.white, size: 30),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -170,8 +177,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onTap: () => context.push('/register'),
                           child: Text('Sign Up',
                               style: context.textStyles.caption.copyWith(
-                                color: context.colors.ink,
-                                fontWeight: FontWeight.w600,
+                                color: context.colors.primary,
+                                fontWeight: FontWeight.w700,
                               )),
                         ),
                       ],

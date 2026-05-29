@@ -384,12 +384,12 @@ class _AddEditTransactionSheetState
                     height: 56,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: context.colors.primary.withAlpha(120), // Setting to muted green matching screenshot specifically. Using a vibrant green will require actual alpha masking, but this is simple.
+                        backgroundColor: context.colors.primary,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                       ),
                       onPressed: _loading ? null : _save,
                       child: _loading
-                          ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.onInk))
+                          ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                           : Text(widget.existing != null ? 'Update Expense' : 'Save Expense', style: context.textStyles.buttonLabel),
                     ),
                   )

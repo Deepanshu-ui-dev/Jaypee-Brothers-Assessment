@@ -46,7 +46,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.colors.surface,
+      backgroundColor: context.colors.pageBg,
       body: FadeTransition(
         opacity: _fadeAnim,
         child: Center(
@@ -58,39 +58,48 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut),
                 ),
                 child: Container(
-                  width: 80,
-                  height: 80,
+                  width: 88,
+                  height: 88,
                   decoration: BoxDecoration(
-                    color: context.colors.ink,
-                    borderRadius: BorderRadius.circular(24),
+                    gradient: context.colors.balanceCardGradient,
+                    borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: context.colors.ink.withAlpha(40),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                        color: context.colors.primary.withAlpha(70),
+                        blurRadius: 24,
+                        offset: const Offset(0, 12),
                       )
                     ],
                   ),
-                  child: Icon(Icons.account_balance_wallet_rounded,
-                      color: context.colors.onInk, size: 40),
+                  child: const Icon(Icons.account_balance_wallet_rounded,
+                      color: Colors.white, size: 42),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Text(
                 'FinTrack',
                 style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.ink,
-                  letterSpacing: -0.5,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: context.colors.textPrimary,
+                  letterSpacing: -0.8,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 'Your personal finance companion',
                 style: TextStyle(
                   fontSize: 13,
                   color: context.colors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 48),
+              SizedBox(
+                width: 28,
+                height: 28,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: context.colors.primary,
                 ),
               ),
             ],

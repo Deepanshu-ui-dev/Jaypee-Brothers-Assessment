@@ -69,6 +69,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Center(
                       child: Column(
                         children: [
+                          Container(
+                            width: 64, height: 64,
+                            decoration: BoxDecoration(
+                              gradient: context.colors.balanceCardGradient,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.colors.primary.withAlpha(60),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 8),
+                                )
+                              ],
+                            ),
+                            child: const Icon(Icons.account_balance_wallet_rounded,
+                                color: Colors.white, size: 30),
+                          ),
+                          const SizedBox(height: 20),
                           Text('Create account', style: context.textStyles.heading.copyWith(fontSize: 26)),
                           const SizedBox(height: 8),
                           Text('Start tracking your finances', style: context.textStyles.caption),
@@ -168,7 +185,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           onTap: () => context.pop(),
                           child: Text('Sign In',
                               style: context.textStyles.caption.copyWith(
-                                color: context.colors.ink, fontWeight: FontWeight.w600)),
+                                color: context.colors.primary, fontWeight: FontWeight.w700)),
                         ),
                       ],
                     ),

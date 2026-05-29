@@ -84,7 +84,7 @@ class FinTrackApp extends ConsumerWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: colors.ink, width: 1),
+          borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -109,15 +109,16 @@ class FinTrackApp extends ConsumerWidget {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: colors.ink,
-          foregroundColor: isDark ? Colors.black : Colors.white,
+          backgroundColor: colors.primary,
+          foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
-          minimumSize: const Size(double.infinity, 48),
+              borderRadius: BorderRadius.circular(14)),
+          minimumSize: const Size(double.infinity, 52),
           textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.1,
           ),
         ),
       ),

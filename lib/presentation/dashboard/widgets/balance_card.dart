@@ -53,12 +53,26 @@ class BalanceCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Text('Today\'s Spending:',
+                      // Period selector chip
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(30),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Total Spent:  Today',
                               style: context.textStyles.caption
-                                  .copyWith(color: Colors.white70)),
-                        ],
+                                  .copyWith(color: Colors.white70, fontSize: 11),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.keyboard_arrow_down_rounded,
+                                color: Colors.white70, size: 14),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 12),
                       todayExp.when(
