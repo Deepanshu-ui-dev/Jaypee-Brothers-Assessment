@@ -63,7 +63,12 @@ zero-elevation aesthetic with advanced theme awareness.
 
 5. **Run the application**:
    ```bash
-   flutter run
+   flutter run --no-tree-shake-icons
+   ```
+
+   To build for production (APK):
+   ```bash
+   flutter build apk --no-tree-shake-icons
    ```
 
 ## 📂 Project Structure
