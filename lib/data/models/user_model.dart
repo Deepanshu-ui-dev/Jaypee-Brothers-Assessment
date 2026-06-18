@@ -1,36 +1,43 @@
-import 'package:firebase_auth/firebase_auth.dart';
-
 class UserModel {
-  final String uid;
   final String name;
-  final String email;
-  final DateTime? createdAt;
-  final String? photoUrl;
+  final String currency;
+  final String currencySymbol;
 
   const UserModel({
-    required this.uid,
     required this.name,
-    required this.email,
-    this.createdAt,
-    this.photoUrl,
+    this.currency = 'NGN',
+    this.currencySymbol = '₦',
   });
 
-  factory UserModel.fromFirebaseUser(User user) {
-    return UserModel(
-      uid: user.uid,
-      name: user.displayName ?? user.email?.split('@').first ?? 'User',
-      email: user.email ?? '',
-      createdAt: user.metadata.creationTime,
-      photoUrl: user.photoURL,
-    );
-  }
-
-  /// Returns initials for the avatar circle (up to 2 characters)
   String get initials {
     final parts = name.trim().split(' ');
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return name.isNotEmpty ? name[0].toUpperCase() : 'U';
+    return name.isEmpty ? 'U' : name[0].toUpperCase();
   }
+
+  UserModel copyWith({
+    String? name,
+    String? currency,
+    String? currencySymbol,
+  }) {
+    return UserModel(
+      name: name ?? this.name,
+      currency: currency ?? this.currency,
+      currencySymbol: currencySymbol ?? this.currencySymbol,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'name': name,
+        'currency': currency,
+        'currencySymbol': currencySymbol,
+      };
+
+  factory UserModel.fromMap(Map<String, dynamic> map) => UserModel(
+        name: map['name'] as String? ?? 'User',
+        currency: map['currency'] as String? ?? 'NGN',
+        currencySymbol: map['currencySymbol'] as String? ?? '₦',
+      );
 }

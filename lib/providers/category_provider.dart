@@ -1,77 +1,55 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/category_model.dart';
 import '../data/repositories/category_repository.dart';
-import 'auth_provider.dart';
 
-// ── Repository ─────────────────────────────────────────────────────────
+// ── Repository ────────────────────────────────────────────────────────────
 final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
   return CategoryRepository();
 });
 
-// ── Categories Stream ──────────────────────────────────────────────────
+// ── All Categories (seeded from Hive) ────────────────────────────────────
 final categoriesProvider =
-    StreamProvider<List<CategoryModel>>((ref) {
-  final user = ref.watch(authRepositoryProvider).currentUser;
-  if (user == null) return const Stream.empty();
-
-  // Seed defaults asynchronously on first load
+    StateNotifierProvider<CategoryNotifier, List<CategoryModel>>((ref) {
   final repo = ref.watch(categoryRepositoryProvider);
-  repo.seedDefaultsIfNeeded(user.uid);
-
-  return repo.watchAll(user.uid);
+  return CategoryNotifier(repo);
 });
 
-// ── Expense categories only ────────────────────────────────────────────
-final expenseCategoriesProvider =
-    Provider<AsyncValue<List<CategoryModel>>>((ref) {
-  return ref.watch(categoriesProvider).whenData(
-        (cats) =>
-            cats.where((c) => c.type == 'expense' || c.type == 'both').toList(),
-      );
-});
-
-// ── Income categories only ─────────────────────────────────────────────
-final incomeCategoriesProvider =
-    Provider<AsyncValue<List<CategoryModel>>>((ref) {
-  return ref.watch(categoriesProvider).whenData(
-        (cats) =>
-            cats.where((c) => c.type == 'income' || c.type == 'both').toList(),
-      );
-});
-
-// ── Category Notifier (add / delete custom) ────────────────────────────
-class CategoryNotifier extends StateNotifier<AsyncValue<void>> {
-  CategoryNotifier(this._repo, this._uid) : super(const AsyncValue.data(null));
+class CategoryNotifier extends StateNotifier<List<CategoryModel>> {
+  CategoryNotifier(this._repo) : super([]) {
+    _load();
+  }
 
   final CategoryRepository _repo;
-  final String _uid;
+
+  Future<void> _load() async {
+    await _repo.seedDefaultsIfNeeded();
+    state = _repo.getAll();
+  }
 
   Future<void> addCategory(CategoryModel category) async {
-    state = const AsyncValue.loading();
-    try {
-      await _repo.add(_uid, category);
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+    await _repo.add(category);
+    state = _repo.getAll();
   }
 
   Future<void> deleteCategory(String categoryId) async {
-    state = const AsyncValue.loading();
-    try {
-      await _repo.delete(_uid, categoryId);
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+    await _repo.delete(categoryId);
+    state = _repo.getAll();
   }
+
+  void reload() => state = _repo.getAll();
 }
 
-final categoryNotifierProvider =
-    StateNotifierProvider<CategoryNotifier, AsyncValue<void>>((ref) {
-  final user = ref.watch(authRepositoryProvider).currentUser;
-  return CategoryNotifier(
-    ref.watch(categoryRepositoryProvider),
-    user?.uid ?? '',
-  );
+// ── Filtered views ────────────────────────────────────────────────────────
+final expenseCategoriesProvider = Provider<List<CategoryModel>>((ref) {
+  return ref
+      .watch(categoriesProvider)
+      .where((c) => c.type == 'expense' || c.type == 'both')
+      .toList();
+});
+
+final incomeCategoriesProvider = Provider<List<CategoryModel>>((ref) {
+  return ref
+      .watch(categoriesProvider)
+      .where((c) => c.type == 'income' || c.type == 'both')
+      .toList();
 });

@@ -19,11 +19,15 @@ class NotificationService {
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
+    final linuxSettings = LinuxInitializationSettings(
+      defaultActionName: 'Open notification',
+    );
 
     await _plugin.initialize(
-      settings: const InitializationSettings(
+      InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
+        linux: linuxSettings,
       ),
     );
 
@@ -54,12 +58,13 @@ class NotificationService {
     );
 
     await _plugin.zonedSchedule(
-      id: 0,
-      title: 'FinTrack Reminder',
-      body: "Don't forget to log today's transactions 💰",
-      scheduledDate: scheduled,
-      notificationDetails: details,
+      0,
+      'FinTrack Reminder',
+      "Don't forget to log today's transactions 💰",
+      scheduled,
+      details,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }

@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/breakpoints.dart';
 import '../../core/utils/validators.dart';
-import '../../data/repositories/auth_repository.dart';
-import '../../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -32,17 +30,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() { _loading = true; _error = null; });
-    try {
-      await ref.read(authNotifierProvider.notifier).signIn(
-            email: _emailCtrl.text,
-            password: _passCtrl.text,
-          );
-      if (mounted) context.go('/');
-    } catch (e) {
-      setState(() => _error = AuthRepository.friendlyError(e));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
+    // App is now offline-only — redirect to main app
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (mounted) context.go('/');
+    if (mounted) setState(() => _loading = false);
   }
 
   @override

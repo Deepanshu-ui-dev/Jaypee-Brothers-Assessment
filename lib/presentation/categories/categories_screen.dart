@@ -24,8 +24,9 @@ class CategoriesScreen extends ConsumerWidget {
           child: Divider(height: 0.5, color: context.colors.divider),
         ),
       ),
-      body: cats.when(
-        data: (categories) {
+      body: Builder(
+        builder: (context) {
+          final categories = cats;
           final expenses = categories.where((c) => c.type == 'expense').toList();
           final incomes = categories.where((c) => c.type == 'income').toList();
 
@@ -42,8 +43,6 @@ class CategoriesScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showModalBottomSheet(
@@ -143,7 +142,7 @@ class _CategoryGrid extends StatelessWidget {
       ),
     );
     if (confirmed == true) {
-      await ref.read(categoryNotifierProvider.notifier).deleteCategory(cat.id);
+      await ref.read(categoriesProvider.notifier).deleteCategory(cat.id);
     }
   }
 }

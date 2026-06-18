@@ -1,46 +1,41 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../local/hive_service.dart';
 import '../models/category_model.dart';
 
 class CategoryRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  CollectionReference<Map<String, dynamic>> _col(String uid) =>
-      _firestore.collection('users').doc(uid).collection('categories');
-
-  /// Real-time stream of all user categories
-  Stream<List<CategoryModel>> watchAll(String uid) {
-    return _col(uid).snapshots().map(
-          (snap) => snap.docs.map(CategoryModel.fromFirestore).toList(),
-        );
+  List<CategoryModel> getAll() {
+    final box = HiveService.categories;
+    if (box.isEmpty) {
+      _seedDefaults();
+    }
+    return box.values.toList();
   }
 
-  /// Seeds default categories if none exist yet
-  Future<void> seedDefaultsIfNeeded(String uid) async {
-    final snap = await _col(uid).limit(1).get();
-    if (snap.docs.isEmpty) {
-      final batch = _firestore.batch();
+  void _seedDefaults() {
+    final box = HiveService.categories;
+    for (final cat in kAllDefaultCategories) {
+      box.put(cat.id, cat);
+    }
+  }
+
+  Future<void> seedDefaultsIfNeeded() async {
+    final box = HiveService.categories;
+    if (box.isEmpty) {
       for (final cat in kAllDefaultCategories) {
-        final docRef = _col(uid).doc(cat.id);
-        batch.set(docRef, cat.toFirestore());
+        await box.put(cat.id, cat);
       }
-      await batch.commit();
     }
   }
 
-  /// Add a custom category
-  Future<void> add(String uid, CategoryModel category) async {
-    await _col(uid).doc(category.id).set(category.toFirestore());
+  Future<void> add(CategoryModel category) async {
+    await HiveService.categories.put(category.id, category);
   }
 
-  /// Delete a custom category (guards against deleting defaults)
-  Future<void> delete(String uid, String categoryId) async {
-    final doc = await _col(uid).doc(categoryId).get();
-    if (doc.exists) {
-      final data = doc.data()!;
-      if (data['isDefault'] == true) {
-        throw Exception('Cannot delete a default category.');
-      }
-      await _col(uid).doc(categoryId).delete();
+  Future<void> delete(String categoryId) async {
+    final cat = HiveService.categories.get(categoryId);
+    if (cat == null) return;
+    if (cat.isDefault) {
+      throw Exception('Cannot delete a default category.');
     }
+    await HiveService.categories.delete(categoryId);
   }
 }

@@ -1,23 +1,30 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../data/local/hive_service.dart';
 
-final themeProvider = StateNotifierProvider<ThemeNotifier, bool>((ref) {
+final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
   return ThemeNotifier();
 });
 
-class ThemeNotifier extends StateNotifier<bool> {
-  ThemeNotifier() : super(false) {
+class ThemeNotifier extends StateNotifier<ThemeMode> {
+  ThemeNotifier() : super(ThemeMode.system) {
     _load();
   }
 
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = prefs.getBool('dark_mode') ?? false;
+  void _load() {
+    final val = HiveService.settings.get('theme_mode') as String?;
+    if (val == 'light') {
+      state = ThemeMode.light;
+    } else if (val == 'dark') {
+      state = ThemeMode.dark;
+    } else {
+      state = ThemeMode.system;
+    }
   }
 
-  Future<void> toggle() async {
-    state = !state;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('dark_mode', state);
+  Future<void> setTheme(ThemeMode mode) async {
+    state = mode;
+    final val = mode == ThemeMode.light ? 'light' : (mode == ThemeMode.dark ? 'dark' : 'system');
+    await HiveService.settings.put('theme_mode', val);
   }
 }

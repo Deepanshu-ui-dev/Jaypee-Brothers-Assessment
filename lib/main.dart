@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'data/services/firebase_service.dart';
+import 'data/local/hive_service.dart';
 import 'data/services/notification_service.dart';
 import 'app/app.dart';
 
@@ -10,11 +9,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    print('📂 [FinTrack] Loading .env...');
-    await dotenv.load(fileName: '.env');
-    
-    print('🔥 [FinTrack] Initializing Firebase...');
-    await FirebaseService.initialize();
+    print('📦 [FinTrack] Initializing Hive...');
+    await HiveService.init();
 
     print('🔔 [FinTrack] Initializing Notifications...');
     await NotificationService.init();

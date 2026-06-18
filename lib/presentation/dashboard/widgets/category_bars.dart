@@ -12,44 +12,38 @@ class CategoryBars extends ConsumerWidget {
     final breakdown = ref.watch(expenseByCategoryProvider);
     final totalExpense = ref.watch(totalExpenseProvider);
 
-    return breakdown.when(
-      data: (map) {
-        if (map.isEmpty) return const SizedBox.shrink();
-        final top3 = map.entries.take(3).toList();
-        final total = totalExpense.valueOrNull ?? 1;
+    if (breakdown.isEmpty) return const SizedBox.shrink();
+    final top3 = breakdown.entries.take(3).toList();
+    final total = totalExpense;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Spending by Category', style: context.textStyles.subheading),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: context.colors.surface,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: context.colors.divider, width: 0.5),
-              ),
-              child: Column(
-                children: List.generate(top3.length, (i) {
-                  final entry = top3[i];
-                  final frac = total > 0 ? (entry.value / total) : 0.0;
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: i < top3.length - 1 ? 12 : 0),
-                    child: _CategoryRow(
-                      name: entry.key,
-                      amount: entry.value,
-                      fraction: frac.clampedProgress,
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ],
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Spending by Category', style: context.textStyles.subheading),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: context.colors.divider, width: 0.5),
+          ),
+          child: Column(
+            children: List.generate(top3.length, (i) {
+              final entry = top3[i];
+              final frac = total > 0 ? (entry.value / total) : 0.0;
+              return Padding(
+                padding: EdgeInsets.only(bottom: i < top3.length - 1 ? 12 : 0),
+                child: _CategoryRow(
+                  name: entry.key,
+                  amount: entry.value,
+                  fraction: frac.clampedProgress,
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
     );
   }
 }

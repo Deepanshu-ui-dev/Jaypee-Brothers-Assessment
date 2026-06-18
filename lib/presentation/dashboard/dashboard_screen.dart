@@ -6,8 +6,10 @@ import '../../core/utils/breakpoints.dart';
 import '../../providers/auth_provider.dart';
 import 'widgets/balance_card.dart';
 import 'widgets/daily_insight_banner.dart';
+import 'widgets/budget_alert_banner.dart';
 import 'widgets/browse_categories.dart';
 import 'widgets/recent_transactions.dart';
+import '../../core/widgets/bottom_padding.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -52,6 +54,7 @@ class DashboardScreen extends ConsumerWidget {
                           const BalanceCard(),
                           const SizedBox(height: 16),
                           const DailyInsightBanner(),
+                          const BudgetAlertBanner(),
                           const SizedBox(height: 32),
                           Text('Browse Categories',
                               style: context.textStyles.subheading),
@@ -206,12 +209,13 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 const BalanceCard(),
                 const SizedBox(height: 16),
                 const DailyInsightBanner(),
+                const BudgetAlertBanner(),
                 const SizedBox(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -238,7 +242,14 @@ class DashboardScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const BrowseCategories(),
+              ]),
+            ),
+          ),
+          const SliverToBoxAdapter(child: BrowseCategories()),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
                 const SizedBox(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -261,6 +272,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 const RecentTransactions(),
+                const BottomPadding(minimum: 120),
               ]),
             ),
           ),

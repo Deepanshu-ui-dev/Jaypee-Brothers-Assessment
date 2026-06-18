@@ -1,71 +1,58 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/repositories/auth_repository.dart';
+import '../data/local/hive_service.dart';
 import '../data/models/user_model.dart';
 
-// ── Repository ─────────────────────────────────────────────────────────
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository();
+// ── Local Profile Provider ──────────────────────────────────────────────────
+final localProfileProvider =
+    StateNotifierProvider<LocalProfileNotifier, UserModel?>((ref) {
+  return LocalProfileNotifier();
 });
 
-// ── Auth State Stream ──────────────────────────────────────────────────
-final authStateProvider = StreamProvider<User?>((ref) {
-  return ref.watch(authRepositoryProvider).authStateChanges;
-});
+class LocalProfileNotifier extends StateNotifier<UserModel?> {
+  LocalProfileNotifier() : super(null) {
+    _load();
+  }
 
-// ── Current User Model ─────────────────────────────────────────────────
-final currentUserProvider = Provider<UserModel?>((ref) {
-  final authRepo = ref.watch(authRepositoryProvider);
-  return authRepo.currentUserModel;
-});
-
-// ── Auth Notifier ──────────────────────────────────────────────────────
-class AuthNotifier extends StateNotifier<AsyncValue<void>> {
-  AuthNotifier(this._repo) : super(const AsyncValue.data(null));
-
-  final AuthRepository _repo;
-
-  Future<void> signIn({required String email, required String password}) async {
-    state = const AsyncValue.loading();
-    try {
-      await _repo.signIn(email: email, password: password);
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+  void _load() {
+    final settings = HiveService.settings;
+    final name = settings.get('profile_name') as String?;
+    if (name != null && name.isNotEmpty) {
+      state = UserModel(
+        name: name,
+        currency: settings.get('profile_currency') as String? ?? 'NGN',
+        currencySymbol:
+            settings.get('profile_currency_symbol') as String? ?? '₦',
+      );
     }
   }
 
-  Future<void> register({
+  Future<void> saveProfile({
     required String name,
-    required String email,
-    required String password,
+    String currency = 'NGN',
+    String currencySymbol = '₦',
   }) async {
-    state = const AsyncValue.loading();
-    try {
-      await _repo.register(name: name, email: email, password: password);
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+    final settings = HiveService.settings;
+    await settings.put('profile_name', name);
+    await settings.put('profile_currency', currency);
+    await settings.put('profile_currency_symbol', currencySymbol);
+    state = UserModel(
+        name: name, currency: currency, currencySymbol: currencySymbol);
   }
 
-  Future<void> sendPasswordReset(String email) async {
-    state = const AsyncValue.loading();
-    try {
-      await _repo.sendPasswordResetEmail(email);
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+  Future<void> updateName(String name) async {
+    await HiveService.settings.put('profile_name', name);
+    state = state?.copyWith(name: name) ??
+        UserModel(name: name);
   }
 
-  Future<void> signOut() async {
-    await _repo.signOut();
-    state = const AsyncValue.data(null);
-  }
+  bool get hasProfile => state != null;
 }
 
-final authNotifierProvider =
-    StateNotifierProvider<AuthNotifier, AsyncValue<void>>((ref) {
-  return AuthNotifier(ref.watch(authRepositoryProvider));
+// ── Convenience provider ────────────────────────────────────────────────────
+final currentUserProvider = Provider<UserModel?>((ref) {
+  return ref.watch(localProfileProvider);
+});
+
+final hasProfileProvider = Provider<bool>((ref) {
+  return ref.watch(localProfileProvider) != null;
 });

@@ -71,7 +71,7 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
       isDefault: false,
     );
 
-    await ref.read(categoryNotifierProvider.notifier).addCategory(cat);
+    await ref.read(categoriesProvider.notifier).addCategory(cat);
     
     if (mounted) {
       Navigator.pop(context);
@@ -181,7 +181,7 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
                         onTap: () => setState(() => _selectedIcon = icon),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isSelected ? _selectedColor.withOpacity(0.2) : context.colors.surface,
+                            color: isSelected ? _selectedColor.withValues(alpha: 51) : context.colors.surface,
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected ? Border.all(color: _selectedColor, width: 1.5) : Border.all(color: context.colors.divider, width: 0.5),
                           ),

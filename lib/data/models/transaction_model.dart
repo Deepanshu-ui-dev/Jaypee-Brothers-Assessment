@@ -1,21 +1,56 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
-enum TransactionType { income, expense }
+part 'transaction_model.g.dart';
 
-class TransactionModel {
-  final String id;
-  final TransactionType type;
-  final double amount;
-  final String categoryId;
-  final String categoryName;
-  final DateTime date;
-  final String note;
-  final List<String> tags;
-  final DateTime createdAt;
-  final bool isRecurring;
-  final String? recurringInterval; // 'daily' | 'weekly' | 'monthly'
-  final String? receiptNumber;
-  final String? paymentMethod;
+@HiveType(typeId: 0)
+enum TransactionType {
+  @HiveField(0)
+  income,
+  @HiveField(1)
+  expense,
+}
+
+@HiveType(typeId: 1)
+class TransactionModel extends HiveObject {
+  @HiveField(0)
+  late String id;
+
+  @HiveField(1)
+  late TransactionType type;
+
+  @HiveField(2)
+  late double amount;
+
+  @HiveField(3)
+  late String categoryId;
+
+  @HiveField(4)
+  late String categoryName;
+
+  @HiveField(5)
+  late DateTime date;
+
+  @HiveField(6)
+  late String note;
+
+  @HiveField(7)
+  late DateTime createdAt;
+
+  @HiveField(8)
+  late bool isRecurring;
+
+  @HiveField(9)
+  String? recurringInterval;
+
+  @HiveField(10)
+  String? receiptNumber;
+
+  @HiveField(11)
+  String? paymentMethod;
+
+  @HiveField(12)
+  late List<String> tags;
 
   TransactionModel({
     required this.id,
@@ -25,54 +60,16 @@ class TransactionModel {
     required this.categoryName,
     required this.date,
     this.note = '',
-    this.tags = const [],
     required this.createdAt,
     this.isRecurring = false,
     this.recurringInterval,
     this.receiptNumber,
     this.paymentMethod,
+    this.tags = const [],
   });
 
   bool get isIncome => type == TransactionType.income;
   bool get isExpense => type == TransactionType.expense;
-
-  factory TransactionModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return TransactionModel(
-      id: doc.id,
-      type: data['type'] == 'income'
-          ? TransactionType.income
-          : TransactionType.expense,
-      amount: (data['amount'] as num).toDouble(),
-      categoryId: data['categoryId'] as String? ?? '',
-      categoryName: data['categoryName'] as String? ?? 'Other',
-      date: (data['date'] as Timestamp).toDate(),
-      note: data['note'] as String? ?? '',
-      tags: List<String>.from(data['tags'] ?? []),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      isRecurring: data['isRecurring'] as bool? ?? false,
-      recurringInterval: data['recurringInterval'] as String?,
-      receiptNumber: data['receiptNumber'] as String?,
-      paymentMethod: data['paymentMethod'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'type': type == TransactionType.income ? 'income' : 'expense',
-      'amount': amount,
-      'categoryId': categoryId,
-      'categoryName': categoryName,
-      'date': Timestamp.fromDate(date),
-      'note': note,
-      'tags': tags,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'isRecurring': isRecurring,
-      'recurringInterval': recurringInterval,
-      'receiptNumber': receiptNumber,
-      'paymentMethod': paymentMethod,
-    };
-  }
 
   TransactionModel copyWith({
     String? id,
@@ -104,5 +101,28 @@ class TransactionModel {
       receiptNumber: receiptNumber ?? this.receiptNumber,
       paymentMethod: paymentMethod ?? this.paymentMethod,
     );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'type': type.name,
+        'amount': amount,
+        'categoryId': categoryId,
+        'categoryName': categoryName,
+        'date': date.toIso8601String(),
+        'note': note,
+        'createdAt': createdAt.toIso8601String(),
+        'isRecurring': isRecurring,
+        'recurringInterval': recurringInterval,
+        'receiptNumber': receiptNumber,
+        'paymentMethod': paymentMethod,
+        'tags': tags,
+      };
+}
+
+// ── Icon data helper (kept for category lookups) ──────────────────────────────
+class IconDataHelper {
+  static IconData fromCodePoint(int codePoint, {String fontFamily = 'MaterialIcons'}) {
+    return IconData(codePoint, fontFamily: fontFamily);
   }
 }

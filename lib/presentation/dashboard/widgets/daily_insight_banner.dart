@@ -27,14 +27,9 @@ class DailyInsightBanner extends ConsumerWidget {
               color: Colors.transparent,
               shape: BoxShape.circle,
             ),
-            child: insight.when(
-              data: (data) => Text(
-                data.isPositive ? '🎯' : '⚠️',
-                style: const TextStyle(fontSize: 32),
-              ),
-              loading: () => const Text('💡', style: TextStyle(fontSize: 32)),
-              error: (_, __) =>
-                  const Text('💡', style: TextStyle(fontSize: 32)),
+            child: Text(
+              insight.isPositive ? '🎯' : '⚠️',
+              style: const TextStyle(fontSize: 32),
             ),
           ),
           const SizedBox(width: 12),
@@ -48,27 +43,11 @@ class DailyInsightBanner extends ConsumerWidget {
                       .copyWith(color: context.colors.insightBannerText),
                 ),
                 const SizedBox(height: 2),
-                insight.when(
-                  data: (data) => Text(
-                    data.text,
-                    style: context.textStyles.caption.copyWith(
-                      color: context.colors.textSecondary,
-                      height: 1.4,
-                    ),
-                  ),
-                  loading: () => Text(
-                    'Calculating your spending patterns…',
-                    style: context.textStyles.caption.copyWith(
-                      color: context.colors.textSecondary,
-                      height: 1.4,
-                    ),
-                  ),
-                  error: (_, __) => Text(
-                    'Add transactions to see your weekly insights',
-                    style: context.textStyles.caption.copyWith(
-                      color: context.colors.textSecondary,
-                      height: 1.4,
-                    ),
+                Text(
+                  insight.text,
+                  style: context.textStyles.caption.copyWith(
+                    color: context.colors.textSecondary,
+                    height: 1.4,
                   ),
                 ),
               ],

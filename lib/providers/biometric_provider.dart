@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,27 +28,51 @@ class BiometricNotifier extends StateNotifier<BiometricState> {
   final _auth = LocalAuthentication();
 
   Future<void> _load() async {
+    // local_auth is not supported on Linux/Windows desktop — guard gracefully.
+    bool available = false;
+    try {
+      available =
+          await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
+    } on MissingPluginException {
+      // Platform does not support biometrics (e.g. Linux desktop).
+      available = false;
+    } on PlatformException {
+      available = false;
+    } catch (_) {
+      available = false;
+    }
+
     final prefs = await SharedPreferences.getInstance();
-    final available = await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
     final enabled = prefs.getBool(_key) ?? false;
-    state = BiometricState(isEnabled: enabled && available, isAvailable: available);
+    if (!mounted) return;
+    state = BiometricState(
+      isEnabled: enabled && available,
+      isAvailable: available,
+    );
   }
 
   Future<bool> toggle() async {
     if (!state.isAvailable) return false;
 
     if (!state.isEnabled) {
-      // Prompt auth before enabling
-      final authenticated = await _auth.authenticate(
-        localizedReason: 'Enable biometric lock for FinTrack',
-        options: const AuthenticationOptions(stickyAuth: true),
-      );
+      bool authenticated = false;
+      try {
+        authenticated = await _auth.authenticate(
+          localizedReason: 'Enable biometric lock for FinTrack',
+          options: const AuthenticationOptions(stickyAuth: true),
+        );
+      } on MissingPluginException {
+        return false;
+      } on PlatformException {
+        return false;
+      }
       if (!authenticated) return false;
     }
 
     final prefs = await SharedPreferences.getInstance();
     final newValue = !state.isEnabled;
     await prefs.setBool(_key, newValue);
+    if (!mounted) return false;
     state = state.copyWith(isEnabled: newValue);
     return true;
   }
@@ -55,10 +80,19 @@ class BiometricNotifier extends StateNotifier<BiometricState> {
   /// Call this on app startup to gate access behind biometrics if enabled.
   Future<bool> authenticate() async {
     if (!state.isEnabled) return true;
-    return _auth.authenticate(
-      localizedReason: 'Verify your identity to access FinTrack',
-      options: const AuthenticationOptions(stickyAuth: true, biometricOnly: true),
-    );
+    try {
+      return await _auth.authenticate(
+        localizedReason: 'Verify your identity to access FinTrack',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+    } on MissingPluginException {
+      return true; // Platform doesn't support it — allow access.
+    } on PlatformException {
+      return true;
+    }
   }
 }
 

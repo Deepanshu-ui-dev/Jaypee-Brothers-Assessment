@@ -1,45 +1,36 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
+import '../local/hive_service.dart';
 import '../models/transaction_model.dart';
 
 class TransactionRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const _uuid = Uuid();
 
-  CollectionReference<Map<String, dynamic>> _col(String uid) =>
-      _firestore.collection('users').doc(uid).collection('transactions');
-
-  /// Real-time stream of all transactions, ordered by date desc
-  Stream<List<TransactionModel>> watchAll(String uid) {
-    return _col(uid)
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map((snap) => snap.docs.map(TransactionModel.fromFirestore).toList());
+  List<TransactionModel> getAll() {
+    final box = HiveService.transactions;
+    return box.values.toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
   }
 
-  /// Add a new transaction
-  Future<void> add(String uid, TransactionModel txn) async {
-    await _col(uid).add(txn.toFirestore());
+  Future<void> add(TransactionModel txn) async {
+    final id = txn.id.isEmpty ? _uuid.v4() : txn.id;
+    final toSave = txn.copyWith(id: id);
+    await HiveService.transactions.put(id, toSave);
   }
 
-  /// Update an existing transaction by id
-  Future<void> update(String uid, TransactionModel txn) async {
-    await _col(uid).doc(txn.id).update(txn.toFirestore());
+  Future<void> update(TransactionModel txn) async {
+    await HiveService.transactions.put(txn.id, txn);
   }
 
-  /// Delete a transaction by id
-  Future<void> delete(String uid, String transactionId) async {
-    await _col(uid).doc(transactionId).delete();
+  Future<void> delete(String id) async {
+    await HiveService.transactions.delete(id);
   }
 
-  /// Get transactions for a specific month (for analytics)
-  Stream<List<TransactionModel>> watchMonth(
-      String uid, int year, int month) {
-    final start = DateTime(year, month, 1);
-    final end = DateTime(year, month + 1, 1);
-    return _col(uid)
-        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-        .where('date', isLessThan: Timestamp.fromDate(end))
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map((snap) => snap.docs.map(TransactionModel.fromFirestore).toList());
+  TransactionModel? getById(String id) {
+    return HiveService.transactions.get(id);
+  }
+
+  List<TransactionModel> getByMonth(int year, int month) {
+    return getAll().where((t) =>
+        t.date.year == year && t.date.month == month).toList();
   }
 }

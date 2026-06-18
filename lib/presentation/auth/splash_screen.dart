@@ -29,11 +29,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Future<void> _redirect() async {
     await Future.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
-    final user = ref.read(authStateProvider).valueOrNull;
+    final user = ref.read(currentUserProvider);
     if (user != null) {
       context.go('/');
     } else {
-      context.go('/login');
+      context.go('/onboarding');
     }
   }
 

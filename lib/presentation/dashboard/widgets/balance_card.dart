@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/extensions/num_extensions.dart';
+import '../../../core/widgets/animated_number.dart';
 import '../../../providers/transaction_provider.dart';
+
 
 class BalanceCard extends ConsumerWidget {
   const BalanceCard({super.key});
@@ -14,18 +16,18 @@ class BalanceCard extends ConsumerWidget {
     final topCat = ref.watch(topCategoryProvider);
 
     // Build the "vs yesterday" label from real data
-    final vsYesterdayLabel = todayExp.whenOrNull(
-      data: (today) {
-        final yesterday = yesterdayExp.valueOrNull ?? 0;
-        if (yesterday <= 0 && today <= 0) return 'No spending today';
-        if (yesterday <= 0) return 'First day of spending!';
-        final diff = today - yesterday;
-        final pct = ((diff.abs() / yesterday) * 100).toStringAsFixed(0);
-        return diff >= 0
-            ? '↑ $pct% higher than yesterday'
-            : '↓ $pct% lower than yesterday';
-      },
-    );
+    String vsYesterdayLabel;
+    if (yesterdayExp <= 0 && todayExp <= 0) {
+      vsYesterdayLabel = 'No spending today';
+    } else if (yesterdayExp <= 0) {
+      vsYesterdayLabel = 'First day of spending!';
+    } else {
+      final diff = todayExp - yesterdayExp;
+      final pct = ((diff.abs() / yesterdayExp) * 100).toStringAsFixed(0);
+      vsYesterdayLabel = diff >= 0
+          ? '↑ $pct% higher than yesterday'
+          : '↓ $pct% lower than yesterday';
+    }
 
 
     return Container(
@@ -75,36 +77,29 @@ class BalanceCard extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      todayExp.when(
-                        data: (val) => Text(val.asCurrency,
-                            style: context.textStyles.displayAmountWhite),
-                        loading: () => Container(
-                            width: 140,
-                            height: 32,
-                            decoration: BoxDecoration(
-                                color: Colors.white12,
-                                borderRadius: BorderRadius.circular(6))),
-                        error: (_, __) => Text('—',
-                            style: context.textStyles.displayAmountWhite),
+                      AnimatedNumber(
+                        number: todayExp,
+                        style: context.textStyles.displayAmountWhite,
+                        prefix: NumExtension.activeCurrencySymbol,
                       ),
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: context.colors.ink.withAlpha(40),
+                          color: Colors.white.withAlpha(40),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.arrow_outward_rounded,
-                                color: context.colors.surface, size: 12),
+                            const Icon(Icons.arrow_outward_rounded,
+                                color: Colors.white, size: 12),
                             const SizedBox(width: 4),
                             Text(
-                              vsYesterdayLabel ?? '—',
+                              vsYesterdayLabel,
                               style: context.textStyles.label.copyWith(
-                                  color: context.colors.surface,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.normal),
                             ),
                           ],
@@ -128,7 +123,7 @@ class BalanceCard extends ConsumerWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: context.colors.ink.withAlpha(25),
+              color: Colors.white.withAlpha(15),
               borderRadius:
                   const BorderRadius.vertical(bottom: Radius.circular(24)),
             ),
@@ -140,8 +135,8 @@ class BalanceCard extends ConsumerWidget {
                   decoration: BoxDecoration(
                       color: Colors.white.withAlpha(30),
                       shape: BoxShape.circle),
-                  child: Icon(Icons.star_rounded,
-                      color: context.colors.surface, size: 16),
+                  child: const Icon(Icons.star_rounded,
+                      color: Colors.white, size: 16),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -151,42 +146,34 @@ class BalanceCard extends ConsumerWidget {
                       Text('Top Category',
                           style: context.textStyles.label
                               .copyWith(color: Colors.white70)),
-                      topCat.when(
-                        data: (cat) => Text(
-                          cat ?? 'No expenses yet',
-                          style: context.textStyles.caption.copyWith(
-                              color: context.colors.surface,
-                              fontWeight: FontWeight.w600),
-                        ),
-                        loading: () => Text('Loading…',
-                            style: context.textStyles.caption
-                                .copyWith(color: Colors.white70)),
-                        error: (_, __) => Text('—',
-                            style: context.textStyles.caption
-                                .copyWith(color: Colors.white70)),
+                      Text(
+                        topCat ?? 'No expenses yet',
+                        style: context.textStyles.caption.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
                 ),
                 // Show top category amount if exists
-                topCat.whenOrNull(
-                    data: (cat) => cat != null
-                        ? ref.watch(expenseByCategoryProvider).whenOrNull(
-                              data: (map) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                    color: Colors.white.withAlpha(30),
-                                    borderRadius: BorderRadius.circular(20)),
-                                child: Text(
-                                  (map[cat] ?? 0).asCurrency,
-                                  style: context.textStyles.label
-                                      .copyWith(color: Colors.white),
-                                ),
-                              ),
-                            )
-                        : null) ??
-                    const SizedBox.shrink(),
+                if (topCat != null)
+                  Builder(builder: (context) {
+                    final map = ref.watch(expenseByCategoryProvider);
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(30),
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Text(
+                        (map[topCat] ?? 0).asCurrency,
+                        style: context.textStyles.label
+                            .copyWith(color: Colors.white),
+                      ),
+                    );
+                  })
+                else
+                  const SizedBox.shrink(),
               ],
             ),
           ),

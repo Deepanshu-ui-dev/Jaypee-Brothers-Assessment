@@ -5,52 +5,32 @@ import 'package:go_router/go_router.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/breakpoints.dart';
 import '../providers/auth_provider.dart';
-import '../presentation/auth/splash_screen.dart';
-import '../presentation/auth/login_screen.dart';
-import '../presentation/auth/register_screen.dart';
-import '../presentation/auth/forgot_password_screen.dart';
+import '../presentation/onboarding/onboarding_screen.dart';
 import '../presentation/dashboard/dashboard_screen.dart';
 import '../presentation/transactions/transactions_screen.dart';
 import '../presentation/analytics/analytics_screen.dart';
-import '../presentation/categories/categories_screen.dart';
+import '../presentation/budget/budget_screen.dart';
 import '../presentation/settings/settings_screen.dart';
 import '../presentation/settings/profile_screen.dart';
 import '../presentation/dashboard/notifications_screen.dart';
 import '../presentation/transactions/add_edit_transaction_sheet.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
+  final hasProfile = ref.watch(hasProfileProvider);
 
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: hasProfile ? '/' : '/onboarding',
     redirect: (context, state) {
-      final isAuth = authState.valueOrNull != null;
-      final isAuthRoute = state.matchedLocation.startsWith('/login') ||
-          state.matchedLocation.startsWith('/register') ||
-          state.matchedLocation.startsWith('/forgot-password') ||
-          state.matchedLocation == '/splash';
+      final isOnboarding = state.matchedLocation == '/onboarding';
 
-      if (state.matchedLocation == '/splash') return null;
-      if (!isAuth && !isAuthRoute) return '/login';
-      if (isAuth && isAuthRoute) return '/';
+      if (!hasProfile && !isOnboarding) return '/onboarding';
+      if (hasProfile && isOnboarding) return '/';
       return null;
     },
     routes: [
       GoRoute(
-        path: '/splash',
-        builder: (_, __) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (_, __) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/register',
-        builder: (_, __) => const RegisterScreen(),
-      ),
-      GoRoute(
-        path: '/forgot-password',
-        builder: (_, __) => const ForgotPasswordScreen(),
+        path: '/onboarding',
+        builder: (_, __) => const OnboardingScreen(),
       ),
       GoRoute(
         path: '/profile',
@@ -78,8 +58,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const AnalyticsScreen(),
           ),
           GoRoute(
-            path: '/categories',
-            builder: (_, __) => const CategoriesScreen(),
+            path: '/budget',
+            builder: (_, __) => const BudgetScreen(),
           ),
           GoRoute(
             path: '/settings',
@@ -200,10 +180,10 @@ class _SideNav extends ConsumerWidget {
             onTap: () => context.go('/transactions'),
           ),
           _SideNavItem(
-            icon: Icons.category_rounded,
-            label: 'Categories',
-            isActive: location.startsWith('/categories'),
-            onTap: () => context.go('/categories'),
+            icon: Icons.account_balance_wallet_rounded,
+            label: 'Budgets',
+            isActive: location.startsWith('/budget'),
+            onTap: () => context.go('/budget'),
           ),
           const SizedBox(height: 16),
           Padding(
@@ -388,9 +368,9 @@ class _MobileShell extends StatelessWidget {
                     ),
                     const _FloatingAddButton(),
                     _NavItem(
-                      icon: Icons.receipt_long_rounded,
-                      isActive: location.startsWith('/transactions'),
-                      onTap: () => context.go('/transactions'),
+                      icon: Icons.account_balance_wallet_rounded,
+                      isActive: location.startsWith('/budget'),
+                      onTap: () => context.go('/budget'),
                     ),
                     _NavItem(
                       icon: Icons.person_outline_rounded,

@@ -5,6 +5,8 @@ import '../../core/extensions/num_extensions.dart';
 import '../../providers/transaction_provider.dart';
 import 'widgets/category_breakdown_list.dart';
 import 'widgets/monthly_bar_chart.dart';
+import 'widgets/daily_line_chart.dart';
+import '../../core/widgets/bottom_padding.dart';
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
@@ -26,22 +28,34 @@ class AnalyticsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
           children: [
-            // ── Header ────────────────────────────────────────────────
+            // ── Header ───────────────────────────────────────────────────────
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Insights',
-                  style: context.textStyles.displayAmount
-                      .copyWith(fontSize: 24, fontWeight: FontWeight.normal),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Insights',
+                      style: context.textStyles.heading.copyWith(fontSize: 24),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Your spending at a glance',
+                      style: context.textStyles.caption.copyWith(
+                        color: context.colors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: context.colors.surface,
-                    border: Border.all(
-                        color: context.colors.primary.withAlpha(50)),
+                    color: context.colors.primary.withAlpha(12),
+                    border:
+                        Border.all(color: context.colors.primary.withAlpha(50)),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -51,7 +65,10 @@ class AnalyticsScreen extends ConsumerWidget {
                       const SizedBox(width: 6),
                       Text(monthName,
                           style: context.textStyles.bodyMedium
-                              .copyWith(color: context.colors.primary)),
+                              .copyWith(
+                                color: context.colors.primary,
+                                fontWeight: FontWeight.w600,
+                              )),
                     ],
                   ),
                 ),
@@ -64,9 +81,10 @@ class AnalyticsScreen extends ConsumerWidget {
               children: [
                 // Total Expenses
                 Expanded(
-                  child: currentExpense.when(
-                    data: (expense) {
-                      final prevExp = previousExpense.valueOrNull ?? 0;
+                  child: Builder(
+                    builder: (context) {
+                      final expense = currentExpense;
+                      final prevExp = previousExpense;
                       final vsLabel = _comparisonLabel(expense, prevExp, isPct: true);
                       final isDown = expense <= prevExp;
                       return _StatPill(
@@ -78,29 +96,16 @@ class AnalyticsScreen extends ConsumerWidget {
                         subtitlePositive: isDown,
                       );
                     },
-                    loading: () => _StatPill(
-                      title: 'This Month',
-                      value: '—',
-                      subtitle: 'Loading…',
-                      icon: Icons.credit_card_rounded,
-                      iconTint: context.colors.primary,
-                    ),
-                    error: (_, __) => _StatPill(
-                      title: 'This Month',
-                      value: '—',
-                      subtitle: 'Error',
-                      icon: Icons.credit_card_rounded,
-                      iconTint: context.colors.primary,
-                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
 
                 // Daily Average
                 Expanded(
-                  child: currentExpense.when(
-                    data: (expense) {
-                      final prevExp = previousExpense.valueOrNull ?? 0;
+                  child: Builder(
+                    builder: (context) {
+                      final expense = currentExpense;
+                      final prevExp = previousExpense;
                       final dailyAvg = dayOfMonth > 0 ? expense / dayOfMonth : 0.0;
                       final prevDays = _daysInPreviousMonth(now);
                       final prevDailyAvg = prevDays > 0 ? prevExp / prevDays : 0.0;
@@ -114,29 +119,16 @@ class AnalyticsScreen extends ConsumerWidget {
                         subtitlePositive: dailyAvg <= prevDailyAvg,
                       );
                     },
-                    loading: () => _StatPill(
-                      title: 'Daily Avg.',
-                      value: '—',
-                      subtitle: 'Loading…',
-                      icon: Icons.access_time_rounded,
-                      iconTint: context.colors.categoryShopping,
-                    ),
-                    error: (_, __) => _StatPill(
-                      title: 'Daily Avg.',
-                      value: '—',
-                      subtitle: 'Error',
-                      icon: Icons.access_time_rounded,
-                      iconTint: context.colors.categoryShopping,
-                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
 
                 // Entries count
                 Expanded(
-                  child: txnCount.when(
-                    data: (count) {
-                      final prevCount = prevTxnCount.valueOrNull ?? 0;
+                  child: Builder(
+                    builder: (context) {
+                      final count = txnCount;
+                      final prevCount = prevTxnCount;
                       final diff = count - prevCount;
                       final sign = diff >= 0 ? '↑' : '↓';
                       final vsLabel =
@@ -150,23 +142,28 @@ class AnalyticsScreen extends ConsumerWidget {
                         subtitlePositive: diff >= 0,
                       );
                     },
-                    loading: () => _StatPill(
-                      title: 'Entries',
-                      value: '—',
-                      subtitle: 'Loading…',
-                      icon: Icons.list_alt_rounded,
-                      iconTint: context.colors.categoryData,
-                    ),
-                    error: (_, __) => _StatPill(
-                      title: 'Entries',
-                      value: '—',
-                      subtitle: 'Error',
-                      icon: Icons.list_alt_rounded,
-                      iconTint: context.colors.categoryData,
-                    ),
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 32),
+
+            // ── Daily Spending Trend ─────────────────────────────────────
+            Text('Daily Spending (This Month)', style: context.textStyles.subheading),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+              decoration: BoxDecoration(
+                color: context.colors.surface,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withAlpha(10),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8))
+                ],
+              ),
+              child: const DailyLineChart(),
             ),
             const SizedBox(height: 32),
 
@@ -217,11 +214,11 @@ class AnalyticsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 32),
 
-            // ── Month Summary Card ─────────────────────────────────────
-            currentExpense.when(
-              data: (expense) {
-                final income = ref.watch(totalIncomeProvider).valueOrNull ?? 0;
-                final prevExp = previousExpense.valueOrNull ?? 0;
+            Builder(
+              builder: (context) {
+                final expense = currentExpense;
+                final income = ref.watch(totalIncomeProvider);
+                final prevExp = previousExpense;
                 final expDiff = expense - prevExp;
                 final expSign = expDiff < 0 ? '↓' : '↑';
                 final expPct = prevExp > 0
@@ -236,9 +233,8 @@ class AnalyticsScreen extends ConsumerWidget {
                   daysElapsed: dayOfMonth,
                 );
               },
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
             ),
+            const BottomPadding(minimum: 120),
           ],
         ),
       ),

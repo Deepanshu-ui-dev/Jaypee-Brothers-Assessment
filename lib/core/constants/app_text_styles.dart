@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
@@ -11,31 +12,36 @@ class AppTextStyles {
         fontWeight: FontWeight.w700,
         letterSpacing: -1.0,
         color: colors.textPrimary,
+        fontFeatures: const [FontFeature.tabularFigures()],
       );
 
   TextStyle get displayAmountWhite => GoogleFonts.plusJakartaSans(
         fontSize: 32,
         fontWeight: FontWeight.w700,
         letterSpacing: -1.0,
-        color: Colors.white, // Still white because it's for the green card
+        color: Colors.white,
+        fontFeatures: const [FontFeature.tabularFigures()],
       );
 
   TextStyle get cardAmount => GoogleFonts.plusJakartaSans(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: colors.textPrimary,
+        fontFeatures: const [FontFeature.tabularFigures()],
       );
 
   TextStyle get cardAmountGreen => GoogleFonts.plusJakartaSans(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: colors.incomeGreen,
+        fontFeatures: const [FontFeature.tabularFigures()],
       );
 
   TextStyle get cardAmountRed => GoogleFonts.plusJakartaSans(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: colors.expenseRed,
+        fontFeatures: const [FontFeature.tabularFigures()],
       );
 
   TextStyle get heading => GoogleFonts.plusJakartaSans(

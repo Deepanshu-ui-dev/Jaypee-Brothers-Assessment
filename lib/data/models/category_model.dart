@@ -1,85 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive/hive.dart';
 import '../../core/constants/app_colors.dart';
 
-class CategoryModel {
-  final String id;
-  final String name;
-  final IconData icon;
-  final Color color;      // icon color
-  final Color bgColor;    // tint background
-  final String type;      // 'expense' | 'income' | 'both'
-  final bool isDefault;
+part 'category_model.g.dart';
 
-  const CategoryModel({
+@HiveType(typeId: 2)
+class CategoryModel extends HiveObject {
+  @HiveField(0)
+  late String id;
+
+  @HiveField(1)
+  late String name;
+
+  @HiveField(2)
+  late int iconCodePoint;
+
+  @HiveField(3)
+  late String iconFontFamily;
+
+  @HiveField(4)
+  late int colorValue;
+
+  @HiveField(5)
+  late int bgColorValue;
+
+  @HiveField(6)
+  late String type; // 'expense' | 'income' | 'both'
+
+  @HiveField(7)
+  late bool isDefault;
+
+  CategoryModel({
     required this.id,
     required this.name,
-    required this.icon,
-    required this.color,
-    required this.bgColor,
+    required IconData icon,
+    required Color color,
+    required Color bgColor,
     required this.type,
     this.isDefault = false,
+  })  : iconCodePoint = icon.codePoint,
+        iconFontFamily = icon.fontFamily ?? 'MaterialIcons',
+        colorValue = color.value,
+        bgColorValue = bgColor.value;
+
+  CategoryModel.raw({
+    required this.id,
+    required this.name,
+    required this.iconCodePoint,
+    required this.iconFontFamily,
+    required this.colorValue,
+    required this.bgColorValue,
+    required this.type,
+    required this.isDefault,
   });
 
-  factory CategoryModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return CategoryModel(
-      id: doc.id,
-      name: data['name'] as String,
-      icon: _getIconData(data['iconCodePoint'] as int),
-      color: Color(data['colorValue'] as int),
-      bgColor: Color(data['bgColorValue'] as int),
-      type: data['type'] as String,
-      isDefault: data['isDefault'] as bool? ?? false,
-    );
-  }
-
-  static IconData _getIconData(int codePoint) {
-    const icons = <IconData>[
-      Icons.restaurant_rounded,
-      Icons.directions_car_rounded,
-      Icons.shopping_bag_rounded,
-      Icons.movie_rounded,
-      Icons.favorite_rounded,
-      Icons.school_rounded,
-      Icons.bolt_rounded,
-      Icons.home_rounded,
-      Icons.spa_rounded,
-      Icons.more_horiz_rounded,
-      Icons.account_balance_wallet_rounded,
-      Icons.laptop_rounded,
-      Icons.trending_up_rounded,
-      Icons.card_giftcard_rounded,
-      Icons.refresh_rounded,
-      Icons.stars_rounded,
-      Icons.fastfood_rounded,
-      Icons.medical_services_rounded,
-      Icons.flight_takeoff_rounded,
-      Icons.pets_rounded,
-      Icons.sports_esports_rounded,
-      Icons.work_rounded,
-      Icons.fitness_center_rounded,
-      Icons.local_cafe_rounded,
-      Icons.subscriptions_rounded,
-      Icons.child_care_rounded,
-      Icons.build_rounded,
-    ];
-    for (final icon in icons) {
-      if (icon.codePoint == codePoint) return icon;
-    }
-    return Icons.more_horiz_rounded;
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'name': name,
-      'iconCodePoint': icon.codePoint,
-      'colorValue': color.value,
-      'bgColorValue': bgColor.value,
-      'type': type,
-      'isDefault': isDefault,
-    };
-  }
+  IconData get icon => IconData(iconCodePoint, fontFamily: iconFontFamily);
+  Color get color => Color(colorValue);
+  Color get bgColor => Color(bgColorValue);
 }
 
 // ─── Default Categories ──────────────────────────────────────────────────────
@@ -242,7 +219,7 @@ extension CategoryModelX on CategoryModel {
     if (!isDefault) return bgColor;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colors = AppColors(isDark);
-    
+
     switch (id) {
       case 'food': return colors.tintFood;
       case 'salary': return colors.tintFood;

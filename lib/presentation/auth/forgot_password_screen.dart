@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/validators.dart';
-import '../../data/repositories/auth_repository.dart';
-import '../../providers/auth_provider.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -30,16 +28,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() { _loading = true; _error = null; });
-    try {
-      await ref
-          .read(authNotifierProvider.notifier)
-          .sendPasswordReset(_emailCtrl.text);
-      if (mounted) setState(() => _sent = true);
-    } catch (e) {
-      setState(() => _error = AuthRepository.friendlyError(e));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
+    // App is now offline-only — no password reset needed
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (mounted) setState(() { _sent = true; _loading = false; });
   }
 
   @override

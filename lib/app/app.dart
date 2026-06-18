@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../providers/theme_provider.dart';
+import '../providers/auth_provider.dart';
+import '../core/extensions/num_extensions.dart';
 import 'router.dart';
 
 class FinTrackApp extends ConsumerWidget {
@@ -11,15 +13,33 @@ class FinTrackApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = ref.watch(themeProvider);
+    final themeMode = ref.watch(themeProvider);
     final router = ref.watch(routerProvider);
+
+    final user = ref.watch(currentUserProvider);
+    if (user != null) {
+      NumExtension.activeCurrencySymbol = user.currencySymbol;
+      if (user.currency == 'NGN') {
+        NumExtension.activeLocale = 'en_NG';
+      } else if (user.currency == 'INR') {
+        NumExtension.activeLocale = 'en_IN';
+      } else if (user.currency == 'USD') {
+        NumExtension.activeLocale = 'en_US';
+      } else if (user.currency == 'EUR') {
+        NumExtension.activeLocale = 'en_US';
+      } else if (user.currency == 'GBP') {
+        NumExtension.activeLocale = 'en_GB';
+      } else {
+        NumExtension.activeLocale = 'en_US';
+      }
+    }
 
     return MaterialApp.router(
       title: 'FinTrack',
       debugShowCheckedModeBanner: false,
       theme: _buildTheme(isDark: false),
       darkTheme: _buildTheme(isDark: true),
-      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }
@@ -34,13 +54,13 @@ class FinTrackApp extends ConsumerWidget {
       scaffoldBackgroundColor: colors.pageBg,
       colorScheme: isDark
           ? ColorScheme.dark(
-              primary: colors.ink,
+              primary: colors.primary,
               surface: colors.surface,
               onSurface: colors.textPrimary,
               outline: colors.divider,
             )
           : ColorScheme.light(
-              primary: colors.ink,
+              primary: colors.primary,
               surface: colors.surface,
               onSurface: colors.textPrimary,
               outline: colors.divider,
