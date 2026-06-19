@@ -1,7 +1,7 @@
 name: fintrack
 description: A fully offline personal finance tracker with budgets, analytics, and smart alerts.
 publish_to: "none"
-version: 1.0.0+1
+version: 1.2.0
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -51,6 +51,8 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
   flutter_staggered_animations: ^1.1.1
+  url_launcher: ^6.3.2
+  image_picker: ^1.2.2
 
 dev_dependencies:
   flutter_test:
@@ -70,5 +72,5 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/images/app_logo.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#1C2030"
+  adaptive_icon_background: "#04061a"
   adaptive_icon_foreground: "assets/images/app_logo.png"

@@ -31,8 +31,9 @@ class _SetBudgetSheetState extends ConsumerState<SetBudgetSheet>
     with SingleTickerProviderStateMixin {
   late final TextEditingController _amountCtrl;
   late final FocusNode _focusNode;
-  late AnimationController _pulseCtrl;
-  late Animation<double> _pulseAnim;
+  late AnimationController _animCtrl;
+  late Animation<double> _fadeAnim;
+  late Animation<Offset> _slideAnim;
 
   final List<int> _presets = [1000, 5000, 10000, 25000, 50000];
 
@@ -46,15 +47,18 @@ class _SetBudgetSheetState extends ConsumerState<SetBudgetSheet>
     );
     _focusNode = FocusNode();
 
-    _pulseCtrl = AnimationController(
+    _animCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
-    _pulseAnim = Tween<double>(begin: 1.0, end: 1.03).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
+      duration: const Duration(milliseconds: 500),
     );
+    _fadeAnim = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut));
 
-    // Auto-focus after frame
+    _animCtrl.forward();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -64,7 +68,7 @@ class _SetBudgetSheetState extends ConsumerState<SetBudgetSheet>
   void dispose() {
     _amountCtrl.dispose();
     _focusNode.dispose();
-    _pulseCtrl.dispose();
+    _animCtrl.dispose();
     super.dispose();
   }
 
@@ -83,9 +87,7 @@ class _SetBudgetSheetState extends ConsumerState<SetBudgetSheet>
     final limit = double.tryParse(raw) ?? 0;
     HapticFeedback.mediumImpact();
     if (limit <= 0) {
-      ref
-          .read(budgetNotifierProvider.notifier)
-          .deleteBudget(widget.categoryId);
+      ref.read(budgetNotifierProvider.notifier).deleteBudget(widget.categoryId);
     } else {
       ref.read(budgetNotifierProvider.notifier).setBudget(
             categoryId: widget.categoryId,
@@ -98,275 +100,481 @@ class _SetBudgetSheetState extends ConsumerState<SetBudgetSheet>
 
   void _delete() {
     HapticFeedback.heavyImpact();
-    ref
-        .read(budgetNotifierProvider.notifier)
-        .deleteBudget(widget.categoryId);
+    ref.read(budgetNotifierProvider.notifier).deleteBudget(widget.categoryId);
     Navigator.of(context).pop();
+  }
+
+  String _formatPreset(int amount) {
+    if (amount >= 100000) return '${(amount / 100000).toStringAsFixed(0)}L';
+    if (amount >= 1000) return '${(amount / 1000).toStringAsFixed(0)}K';
+    return amount.toString();
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final styles = context.textStyles;
     final viewInsets = MediaQuery.viewInsetsOf(context);
     final currencySymbol = NumExtension.activeCurrencySymbol;
+    final hasAmount = _amountCtrl.text.trim().isNotEmpty &&
+        (double.tryParse(_amountCtrl.text) ?? 0) > 0;
 
-    return Container(
-      padding: EdgeInsets.only(bottom: viewInsets.bottom),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // ── Drag handle ──
-          const SizedBox(height: 12),
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colors.divider,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: SlideTransition(
+        position: _slideAnim,
+        child: Container(
+          padding: EdgeInsets.only(bottom: viewInsets.bottom),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
-
-          // ── Category Header ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-            child: Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Drag handle ──
+              const SizedBox(height: 12),
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: widget.iconBg,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(widget.categoryIcon,
-                      color: widget.iconColor, size: 26),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Monthly Limit',
-                        style: context.textStyles.caption.copyWith(
-                          color: context.colors.textSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.categoryName,
-                        style:
-                            context.textStyles.heading.copyWith(fontSize: 20),
-                      ),
-                    ],
+                    color: colors.divider,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                if (widget.currentLimit > 0)
-                  GestureDetector(
-                    onTap: _delete,
-                    child: Container(
-                      padding: const EdgeInsets.all(9),
+              ),
+              const SizedBox(height: 20),
+
+              // ── Category Header ──
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    // Icon with subtle glow ring
+                    Container(
+                      width: 56,
+                      height: 56,
                       decoration: BoxDecoration(
-                        color: context.colors.expenseRed.withAlpha(15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: context.colors.expenseRed.withAlpha(40),
-                        ),
+                        color: widget.iconBg,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: widget.iconColor.withAlpha(50),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
-                      child: Icon(
-                        Icons.delete_outline_rounded,
-                        color: context.colors.expenseRed,
-                        size: 18,
+                      child: Icon(widget.categoryIcon,
+                          color: widget.iconColor, size: 26),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'MONTHLY LIMIT',
+                            style: styles.caption.copyWith(
+                              color: colors.textMuted,
+                              fontSize: 11.0,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            widget.categoryName,
+                            style: styles.heading.copyWith(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ),
-
-          // ── Big Amount Input ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
-            child: ScaleTransition(
-              scale: _pulseAnim,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  color: context.colors.pageBg,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: context.colors.primary.withAlpha(60),
-                    width: 1.5,
-                  ),
+                    if (widget.currentLimit > 0)
+                      _DeleteButton(colors: colors, onTap: _delete),
+                  ],
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+              ),
+
+              const SizedBox(height: 28),
+
+              // ── Amount input card ──
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _AmountInputCard(
+                  amountCtrl: _amountCtrl,
+                  focusNode: _focusNode,
+                  currencySymbol: currencySymbol,
+                  colors: colors,
+                  styles: styles,
+                  onChanged: () => setState(() {}),
+                  onSubmitted: (_) => _save(),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // ── Preset chips ──
+              Padding(
+                padding: const EdgeInsets.only(left: 24, right: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$currencySymbol ',
-                      style: context.textStyles.heading.copyWith(
-                        fontSize: 28,
-                        color: context.colors.textMuted,
-                        fontWeight: FontWeight.w400,
+                      'Quick select',
+                      style: styles.caption.copyWith(
+                        color: colors.textMuted,
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    IntrinsicWidth(
-                      child: TextField(
-                        controller: _amountCtrl,
-                        focusNode: _focusNode,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        textAlign: TextAlign.center,
-                        style: context.textStyles.displayAmount.copyWith(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -1.5,
-                          color: context.colors.textPrimary,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: '0',
-                          hintStyle: context.textStyles.displayAmount.copyWith(
-                            fontSize: 40,
-                            fontWeight: FontWeight.w300,
-                            color: context.colors.textMuted.withAlpha(100),
-                          ),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 80),
-                        ),
-                        onSubmitted: (_) => _save(),
+                    const SizedBox(height: 10),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _presets.map((amount) {
+                          final isSelected =
+                              _amountCtrl.text == amount.toString();
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: _PresetChip(
+                              label:
+                                  '$currencySymbol ${_formatPreset(amount)}',
+                              isSelected: isSelected,
+                              colors: colors,
+                              styles: styles,
+                              onTap: () => _applyPreset(amount),
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
 
-          // ── Preset Chips ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _presets.map((amount) {
-                  final isSelected =
-                      _amountCtrl.text == amount.toString();
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () => _applyPreset(amount),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? context.colors.primary
-                              : context.colors.surfaceSubtle,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected
-                                ? context.colors.primary
-                                : context.colors.divider,
-                          ),
-                        ),
-                        child: Text(
-                          '$currencySymbol ${_formatPreset(amount)}',
-                          style: context.textStyles.label.copyWith(
-                            color: isSelected
-                                ? Colors.white
-                                : context.colors.textSecondary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+              const SizedBox(height: 24),
+
+              // ── Divider ──
+              Divider(
+                color: colors.divider,
+                height: 1,
+                indent: 24,
+                endIndent: 24,
               ),
-            ),
-          ),
+              const SizedBox(height: 20),
 
-          // ── Divider ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Divider(color: context.colors.divider, height: 1),
-          ),
-          const SizedBox(height: 16),
-
-          // ── Save Button ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            child: SizedBox(
-              width: double.infinity,
-              child: GestureDetector(
-                onTap: _save,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        context.colors.primary,
-                        context.colors.primaryDark,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.colors.primary.withAlpha(80),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.check_rounded,
-                          color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        widget.currentLimit > 0
-                            ? 'Update Budget'
-                            : 'Set Budget',
-                        style: context.textStyles.bodyMedium.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
+              // ── Save Button ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 28),
+                child: _SaveButton(
+                  isUpdate: widget.currentLimit > 0,
+                  isEnabled: hasAmount,
+                  colors: colors,
+                  styles: styles,
+                  onTap: _save,
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Sub-widgets ────────────────────────────────────────────────
+
+class _DeleteButton extends StatelessWidget {
+  final AppColors colors;
+  final VoidCallback onTap;
+
+  const _DeleteButton({required this.colors, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: colors.expenseBg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: colors.expenseRed.withAlpha(50),
+            width: 0.5,
+          ),
+        ),
+        child: Icon(
+          Icons.delete_outline_rounded,
+          color: colors.expenseRed,
+          size: 18,
+        ),
+      ),
+    );
+  }
+}
+
+class _AmountInputCard extends StatelessWidget {
+  final TextEditingController amountCtrl;
+  final FocusNode focusNode;
+  final String currencySymbol;
+  final AppColors colors;
+  final dynamic styles;
+  final VoidCallback onChanged;
+  final ValueChanged<String> onSubmitted;
+
+  const _AmountInputCard({
+    required this.amountCtrl,
+    required this.focusNode,
+    required this.currencySymbol,
+    required this.colors,
+    required this.styles,
+    required this.onChanged,
+    required this.onSubmitted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
+      decoration: BoxDecoration(
+        // Subtle violet tint background — uses insightBannerBg from color scheme
+        color: colors.insightBannerBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colors.primary.withAlpha(55),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Currency symbol badge
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: colors.primary.withAlpha(18),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: colors.primary.withAlpha(40),
+                width: 0.5,
+              ),
             ),
+            child: Text(
+              currencySymbol,
+              style: styles.heading.copyWith(
+                fontSize: 16.0,
+                color: colors.insightBannerText,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Big number field
+          IntrinsicWidth(
+            child: TextField(
+              controller: amountCtrl,
+              focusNode: focusNode,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              textAlign: TextAlign.center,
+              style: styles.displayAmount?.copyWith(
+                    fontSize: 48.0,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -2.0,
+                    color: colors.textPrimary,
+                  ) ??
+                  TextStyle(
+                    fontSize: 48.0,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -2.0,
+                    color: colors.textPrimary,
+                  ),
+              decoration: InputDecoration(
+                hintText: '0',
+                hintStyle: TextStyle(
+                  fontSize: 48.0,
+                  fontWeight: FontWeight.w300,
+                  letterSpacing: -2.0,
+                  color: colors.textMuted.withAlpha(80),
+                ),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 100),
+              ),
+              onChanged: (_) => onChanged(),
+              onSubmitted: onSubmitted,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'per month',
+            style: styles.caption?.copyWith(
+                  color: colors.insightBannerText.withAlpha(160),
+                  fontSize: 13.0,
+                  fontWeight: FontWeight.w500,
+                ) ??
+                TextStyle(
+                  color: colors.insightBannerText.withAlpha(160),
+                  fontSize: 13.0,
+                ),
           ),
         ],
       ),
     );
   }
+}
 
-  String _formatPreset(int amount) {
-    if (amount >= 100000) {
-      return '${(amount / 100000).toStringAsFixed(0)}L';
-    } else if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(0)}K';
-    }
-    return amount.toString();
+class _PresetChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final AppColors colors;
+  final dynamic styles;
+  final VoidCallback onTap;
+
+  const _PresetChip({
+    required this.label,
+    required this.isSelected,
+    required this.colors,
+    required this.styles,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: [colors.primary, colors.primaryDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected ? null : colors.surfaceSubtle,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: isSelected
+                ? colors.primary
+                : colors.divider,
+            width: isSelected ? 0 : 0.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: colors.primary.withAlpha(60),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: styles.label?.copyWith(
+                color: isSelected ? Colors.white : colors.textSecondary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.0,
+              ) ??
+              TextStyle(
+                color: isSelected ? Colors.white : colors.textSecondary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.0,
+              ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SaveButton extends StatelessWidget {
+  final bool isUpdate;
+  final bool isEnabled;
+  final AppColors colors;
+  final dynamic styles;
+  final VoidCallback onTap;
+
+  const _SaveButton({
+    required this.isUpdate,
+    required this.isEnabled,
+    required this.colors,
+    required this.styles,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: isEnabled ? 1.0 : 0.45,
+      duration: const Duration(milliseconds: 200),
+      child: GestureDetector(
+        onTap: isEnabled ? onTap : null,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 17),
+          decoration: BoxDecoration(
+            gradient: isEnabled
+                ? colors.balanceCardGradient
+                : null,
+            color: isEnabled ? null : colors.surfaceSubtle,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isEnabled
+                ? [
+                    BoxShadow(
+                      color: colors.primary.withAlpha(90),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: colors.secondary.withAlpha(50),
+                      blurRadius: 10,
+                      offset: const Offset(-4, 4),
+                    ),
+                  ]
+                : [],
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isUpdate
+                    ? Icons.edit_rounded
+                    : Icons.check_rounded,
+                color: isEnabled ? Colors.white : colors.textMuted,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isUpdate ? 'Update Budget' : 'Set Budget',
+                style: styles.bodyMedium?.copyWith(
+                      color: isEnabled ? Colors.white : colors.textMuted,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16.0,
+                    ) ??
+                    TextStyle(
+                      color: isEnabled ? Colors.white : colors.textMuted,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16.0,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

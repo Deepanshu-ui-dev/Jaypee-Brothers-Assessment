@@ -78,6 +78,9 @@ final filteredTransactionsProvider = Provider<List<TransactionModel>>((ref) {
             t.categoryName.toLowerCase().contains(query))
         .toList();
   }
+  
+  list = list.toList()..sort((a, b) => b.date.compareTo(a.date));
+  
   return list;
 });
 
@@ -144,7 +147,9 @@ final expenseByCategoryProvider = Provider<Map<String, double>>((ref) {
 
 // ── Recent 5 Transactions ─────────────────────────────────────────────────
 final recentTransactionsProvider = Provider<List<TransactionModel>>((ref) {
-  return ref.watch(transactionNotifierProvider).take(5).toList();
+  final all = ref.watch(transactionNotifierProvider).toList();
+  all.sort((a, b) => b.date.compareTo(a.date));
+  return all.take(5).toList();
 });
 
 // ── Monthly totals (last 6 months) ───────────────────────────────────────
@@ -169,6 +174,18 @@ final currentMonthExpenseProvider = Provider<double>((ref) {
   final now = DateTime.now();
   return ref.watch(transactionNotifierProvider).where((t) =>
       t.isExpense && t.date.year == now.year && t.date.month == now.month).fold(0.0, (s, t) => s + t.amount);
+});
+
+final currentMonthIncomeProvider = Provider<double>((ref) {
+  final now = DateTime.now();
+  return ref.watch(transactionNotifierProvider).where((t) =>
+      t.isIncome && t.date.year == now.year && t.date.month == now.month).fold(0.0, (s, t) => s + t.amount);
+});
+
+final currentMonthNetBalanceProvider = Provider<double>((ref) {
+  final income = ref.watch(currentMonthIncomeProvider);
+  final expense = ref.watch(currentMonthExpenseProvider);
+  return income - expense;
 });
 
 final previousMonthExpenseProvider = Provider<double>((ref) {
@@ -236,14 +253,20 @@ final dailySpendingProvider = Provider<List<Map<String, dynamic>>>((ref) {
 
   return List.generate(daysInMonth, (i) {
     final day = i + 1;
-    final amount = txns
-        .where((t) =>
-            t.isExpense &&
-            t.date.year == now.year &&
-            t.date.month == now.month &&
-            t.date.day == day)
+    final dayTxns = txns.where((t) =>
+        t.date.year == now.year &&
+        t.date.month == now.month &&
+        t.date.day == day);
+        
+    final expense = dayTxns
+        .where((t) => t.isExpense)
         .fold(0.0, (s, t) => s + t.amount);
-    return {'day': day, 'amount': amount};
+        
+    final income = dayTxns
+        .where((t) => t.isIncome)
+        .fold(0.0, (s, t) => s + t.amount);
+
+    return {'day': day, 'amount': expense, 'income': income};
   });
 });
 
@@ -304,4 +327,35 @@ final streakProvider = Provider<int>((ref) {
     checkDate = checkDate.subtract(const Duration(days: 1));
   }
   return streak;
+});
+
+// ── Daily Net Balance (last 14 days) — for the flow line chart ───────────
+final dailyNetBalanceProvider =
+    Provider<List<({DateTime date, double net})>>((ref) {
+  final txns = ref.watch(transactionNotifierProvider);
+  final now = DateTime.now();
+  return List.generate(14, (i) {
+    final day = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: 13 - i));
+    final dayTxns = txns.where((t) =>
+        t.date.year == day.year &&
+        t.date.month == day.month &&
+        t.date.day == day.day);
+    final income =
+        dayTxns.where((t) => t.isIncome).fold(0.0, (s, t) => s + t.amount);
+    final expense =
+        dayTxns.where((t) => t.isExpense).fold(0.0, (s, t) => s + t.amount);
+    return (date: day, net: income - expense);
+  });
+});
+
+// ── Category breakdown for analytics ─────────────────────────────────────
+final categoryBreakdownProvider =
+    Provider<List<({String name, double amount, double pct})>>((ref) {
+  final map = ref.watch(expenseByCategoryProvider);
+  final total = map.values.fold(0.0, (s, v) => s + v);
+  if (total == 0) return [];
+  return map.entries
+      .map((e) => (name: e.key, amount: e.value, pct: e.value / total))
+      .toList();
 });

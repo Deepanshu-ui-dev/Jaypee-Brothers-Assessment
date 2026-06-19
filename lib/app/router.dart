@@ -332,11 +332,15 @@ class _MobileShell extends StatelessWidget {
       body: child,
       bottomNavigationBar: SafeArea(
         child: Container(
-          margin: const EdgeInsets.fromLTRB(40, 0, 40, 24),
+          margin: const EdgeInsets.fromLTRB(32, 0, 32, 24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(40),
+            borderRadius: BorderRadius.circular(30),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -344,36 +348,33 @@ class _MobileShell extends StatelessWidget {
                   color: context.colors.surfaceGlass,
                   borderRadius: BorderRadius.circular(40),
                   border: Border.all(
-                      color: context.colors.divider.withAlpha(80), width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(15),
-                      blurRadius: 30,
-                      offset: const Offset(0, 15),
-                    ),
-                  ],
+                      color: context.colors.divider.withAlpha(100), width: 1.2),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _NavItem(
                       icon: Icons.home_rounded,
+                      label: 'Home',
                       isActive: location == '/',
                       onTap: () => context.go('/'),
                     ),
                     _NavItem(
                       icon: Icons.pie_chart_rounded,
+                      label: 'Analytics',
                       isActive: location.startsWith('/analytics'),
                       onTap: () => context.go('/analytics'),
                     ),
                     const _FloatingAddButton(),
                     _NavItem(
                       icon: Icons.account_balance_wallet_rounded,
+                      label: 'Budget',
                       isActive: location.startsWith('/budget'),
                       onTap: () => context.go('/budget'),
                     ),
                     _NavItem(
                       icon: Icons.person_outline_rounded,
+                      label: 'Settings',
                       isActive: location.startsWith('/settings'),
                       onTap: () => context.go('/settings'),
                     ),
@@ -391,11 +392,13 @@ class _MobileShell extends StatelessWidget {
 class _NavItem extends StatelessWidget {
   const _NavItem({
     required this.icon,
+    required this.label,
     required this.isActive,
     required this.onTap,
   });
 
   final IconData icon;
+  final String label;
   final bool isActive;
   final VoidCallback onTap;
 
@@ -405,20 +408,49 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(8),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.symmetric(
+            horizontal: isActive ? 16 : 12, vertical: 8),
         decoration: BoxDecoration(
           color: isActive
               ? context.colors.primary.withAlpha(20)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Icon(
-          icon,
-          size: 26,
-          color: isActive
-              ? context.colors.primary
-              : context.colors.textMuted.withAlpha(120),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isActive
+                  ? context.colors.primary
+                  : context.colors.textMuted.withAlpha(150),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                width: isActive ? null : 0,
+                child: Padding(
+                  padding: isActive
+                      ? const EdgeInsets.only(left: 6)
+                      : EdgeInsets.zero,
+                  child: Text(
+                    label,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: context.colors.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -471,8 +503,8 @@ class _FloatingAddButtonState extends State<_FloatingAddButton>
       child: ScaleTransition(
         scale: _scale,
         child: Container(
-          width: 52,
-          height: 52,
+          width: 45,
+          height: 45,
           decoration: BoxDecoration(
             color: context.colors.primary,
             shape: BoxShape.circle,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/biometric_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -30,10 +31,26 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
     final user = ref.read(currentUserProvider);
-    if (user != null) {
+    if (user == null) {
+      context.go('/onboarding');
+      return;
+    }
+    // Trigger biometric if enabled
+    final biometric = ref.read(biometricProvider.notifier);
+    final authenticated = await biometric.authenticate();
+    if (!mounted) return;
+    if (authenticated) {
       context.go('/');
     } else {
-      context.go('/onboarding');
+      // Auth failed — exit or show error
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Biometric authentication failed. Please try again.'),
+        ),
+      );
+      // Retry after a moment
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) _redirect();
     }
   }
 

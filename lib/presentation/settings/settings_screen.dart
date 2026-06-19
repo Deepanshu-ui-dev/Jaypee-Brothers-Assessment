@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/breakpoints.dart';
 import '../../data/services/export_service.dart';
@@ -107,13 +109,21 @@ class SettingsScreen extends ConsumerWidget {
                             shape: BoxShape.circle,
                             border: Border.all(
                                 color: Colors.white.withAlpha(80), width: 2),
+                            image: user?.profileImagePath != null
+                                ? DecorationImage(
+                                    image: FileImage(File(user!.profileImagePath!)),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
                           alignment: Alignment.center,
-                          child: Text(
-                            user?.initials ?? 'U',
-                            style: context.textStyles.heading.copyWith(
-                                fontSize: 28, color: Colors.white),
-                          ),
+                          child: user?.profileImagePath == null
+                              ? Text(
+                                  user?.initials ?? 'U',
+                                  style: context.textStyles.heading.copyWith(
+                                      fontSize: 28, color: Colors.white),
+                                )
+                              : null,
                         ),
                         const SizedBox(width: 18),
                         // Name & meta
@@ -126,7 +136,16 @@ class SettingsScreen extends ConsumerWidget {
                                 style: context.textStyles.heading.copyWith(
                                     fontSize: 20, color: Colors.white),
                               ),
-                              const SizedBox(height: 4),
+                              if (user?.profession != null && user!.profession!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  user.profession!,
+                                  style: context.textStyles.caption.copyWith(
+                                    fontSize: 13, color: Colors.white.withAlpha(200),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 6),
                               Row(
                                 children: [
                                   _PillBadge(
@@ -210,23 +229,6 @@ class SettingsScreen extends ConsumerWidget {
                           indent: 60,
                           color: context.colors.divider),
                       // Biometric
-                      _ToggleRow(
-                        icon: Icons.fingerprint_rounded,
-                        iconBg: const Color(0xFF10B981),
-                        title: 'Biometric Lock',
-                        value: biometricState.isEnabled,
-                        onChanged: biometricState.isAvailable
-                            ? (_) async => await ref
-                                .read(biometricProvider.notifier)
-                                .toggle()
-                            : (_) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Not available on this device')),
-                                );
-                              },
-                      ),
                     ],
                   ),
                 ),
@@ -271,6 +273,38 @@ class SettingsScreen extends ConsumerWidget {
                           await ExportService.exportTransactionsCsv(txns);
                         },
                       ),
+                      Divider(
+                          height: 0.5,
+                          indent: 60,
+                          color: context.colors.divider),
+                      _ActionRow(
+                        icon: Icons.logout_rounded,
+                        iconBg: context.colors.expenseRed,
+                        title: 'Log Out',
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              backgroundColor: context.colors.surface,
+                              title: Text('Log Out', style: context.textStyles.heading),
+                              content: Text('Are you sure you want to log out? This will clear your local profile data.', style: context.textStyles.body),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: Text('Cancel', style: context.textStyles.bodyMedium),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    ref.read(localProfileProvider.notifier).clearProfile();
+                                  },
+                                  child: Text('Log Out', style: context.textStyles.bodyMedium.copyWith(color: context.colors.expenseRed)),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -298,7 +332,12 @@ class SettingsScreen extends ConsumerWidget {
                         icon: Icons.help_outline_rounded,
                         iconBg: const Color(0xFF8B5CF6),
                         title: 'Help & Support',
-                        onTap: () {},
+                        onTap: () async {
+                          final uri = Uri.parse('https://deepanshux.tech');
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri);
+                          }
+                        },
                       ),
                       Divider(
                           height: 0.5,
@@ -308,7 +347,12 @@ class SettingsScreen extends ConsumerWidget {
                         icon: Icons.info_outline_rounded,
                         iconBg: const Color(0xFF64748B),
                         title: 'About FinTrack',
-                        onTap: () {},
+                        onTap: () async {
+                          final uri = Uri.parse('https://github.com/Deepanshu-ui-dev/Fintracker');
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri);
+                          }
+                        },
                         trailingIcon: Icons.open_in_new_rounded,
                       ),
                     ],

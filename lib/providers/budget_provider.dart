@@ -107,7 +107,7 @@ final budgetAlertsProvider =
         ? (spent / budget.limitAmount).clamp(0.0, 2.0)
         : 0.0;
 
-    if (pct >= 0.8) {
+    if (pct >= 0.85) {
       alerts.add((
         categoryId: budget.categoryId,
         categoryName: budget.categoryName,

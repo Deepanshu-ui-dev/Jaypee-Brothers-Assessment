@@ -8,17 +8,19 @@ class AppTextStyles {
   const AppTextStyles(this.colors);
 
   TextStyle get displayAmount => GoogleFonts.plusJakartaSans(
-        fontSize: 32,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -1.0,
+        fontSize: 34,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -1.2,
+        height: 1.1,
         color: colors.textPrimary,
         fontFeatures: const [FontFeature.tabularFigures()],
       );
 
   TextStyle get displayAmountWhite => GoogleFonts.plusJakartaSans(
-        fontSize: 32,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -1.0,
+        fontSize: 34,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -1.2,
+        height: 1.1,
         color: Colors.white,
         fontFeatures: const [FontFeature.tabularFigures()],
       );
@@ -45,16 +47,19 @@ class AppTextStyles {
       );
 
   TextStyle get heading => GoogleFonts.plusJakartaSans(
-        fontSize: 18,
-        fontWeight: FontWeight.w700,
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
         color: colors.textPrimary,
-        letterSpacing: -0.5,
+        letterSpacing: -0.8,
+        height: 1.2,
       );
 
   TextStyle get subheading => GoogleFonts.plusJakartaSans(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
         color: colors.textPrimary,
+        letterSpacing: -0.3,
+        height: 1.3,
       );
 
   TextStyle get body => GoogleFonts.plusJakartaSans(
@@ -64,9 +69,10 @@ class AppTextStyles {
       );
 
   TextStyle get bodyMedium => GoogleFonts.plusJakartaSans(
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: FontWeight.w600,
         color: colors.textPrimary,
+        height: 1.4,
       );
 
   TextStyle get caption => GoogleFonts.plusJakartaSans(
@@ -76,8 +82,9 @@ class AppTextStyles {
       );
 
   TextStyle get label => GoogleFonts.plusJakartaSans(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.5,
         color: colors.textMuted,
       );
 

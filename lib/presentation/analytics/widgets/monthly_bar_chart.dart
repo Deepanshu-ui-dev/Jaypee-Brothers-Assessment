@@ -57,15 +57,25 @@ class MonthlyBarChart extends ConsumerWidget {
               barRods: [
                 BarChartRodData(
                   toY: income,
-                  color: context.colors.ink,
-                  width: 10,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                  color: const Color(0xFF34D399), // Green
+                  width: 12,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxY * 1.2,
+                    color: const Color(0xFF34D399).withAlpha(15),
+                  ),
                 ),
                 BarChartRodData(
                   toY: expense,
-                  color: context.colors.divider.withAlpha(200),
-                  width: 10,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                  color: const Color(0xFFFF6B6B), // Red
+                  width: 12,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxY * 1.2,
+                    color: const Color(0xFFFF6B6B).withAlpha(15),
+                  ),
                 ),
               ],
               barsSpace: 4,

@@ -10,9 +10,87 @@
 
 <br>
 
+<div align="center">
+  <a href="https://github.com/Deepanshu-ui-dev/Fintracker/releases/download/V1.1.0/FinTrack.apk">
+    <img src="https://img.shields.io/badge/⬇️%20Download%20APK-FinTrack%20v1.1.0-7C3AED?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+  </a>
+</div>
+
+<br>
+
 > FinTrack is a sophisticated, high-performance Flutter application designed to provide a **premium, state-of-the-art personal finance tracking experience**. Built with a severe focus on fluid UI, high-impact design, and robust local state management — it completely reimagines how you interact with your financial data.
 
 **FinTrack is 100% Offline-First.** No loading spinners, no network requests — everything is instantaneous.
+
+---
+
+## 📱 Screenshots
+
+<div align="center">
+
+### 🏠 Dashboard
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/1.jpeg" width="220" alt="Dashboard Dark" />
+      <br><sub><b>Dashboard · Dark Mode</b></sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/2.jpeg" width="220" alt="Dashboard Light" />
+      <br><sub><b>Dashboard · Light Mode</b></sub>
+    </td>
+  </tr>
+</table>
+
+### 📊 Analytics
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/3.jpeg" width="220" alt="Analytics Screen" />
+      <br><sub><b>Analytics — Net Balance, Daily Spending Chart</b></sub>
+    </td>
+  </tr>
+</table>
+
+### 💰 Budget Goals
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/5.jpeg" width="220" alt="Budget Dark" />
+      <br><sub><b>Budget Goals · Dark Mode</b></sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/4.jpeg" width="220" alt="Budget Light" />
+      <br><sub><b>Budget Goals · Light Mode</b></sub>
+    </td>
+  </tr>
+</table>
+
+### 🧾 Transactions
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/7.jpeg" width="220" alt="Transactions List" />
+      <br><sub><b>Transactions — Grouped List</b></sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/8.jpeg" width="220" alt="New Transaction Sheet" />
+      <br><sub><b>New Transaction Sheet</b></sub>
+    </td>
+  </tr>
+</table>
+
+### ⚙️ Settings & Profile
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/6.jpeg" width="220" alt="Profile & Settings" />
+      <br><sub><b>Profile, Theme & Settings</b></sub>
+    </td>
+  </tr>
+</table>
+
+</div>
 
 ---
 
@@ -27,22 +105,25 @@ This application is engineered to feel **tactile, alive, and profoundly premium*
 | **Fluid Animations** | `BouncingButton` press-shrink, `AnimatedNumber` rolling counters, staggered list entries via `flutter_staggered_animations`, spring-curve progress bars |
 | **Micro-Interactions** | Sliding income/expense toggle pill, pulsing FAB, animated budget progress bars that grow on first render |
 | **Adaptive Layout** | Floating glassmorphic nav pill on mobile; two-column sidebar layout on desktop/web |
+| **Dark & Light Modes** | Full dual-theme support with a single tap from Settings |
 
 ---
 
 ## 🚀 Key Features
 
 ### 💳 Dashboard
-- **Balance Card** — gradient card with today's spend, animated sparkline, vs-yesterday comparison, and top category callout
+- **Balance Card** — gradient card showing Net Balance (Income − Expense) with animated sparkline graph
+- **Earned / Spent breakdown** — live monthly income vs expense detail in the card footer
 - **Daily Insight Banner** — AI-style weekly spending insight (% above/below personal average)
 - **Budget Alert Banner** — real-time warnings when any category nears or exceeds its monthly limit
-- **Browse Categories** — horizontally scrollable filter chips with transaction drill-down
+- **Browse Categories** — horizontally scrollable category grid with transaction drill-down
 
 ### 📊 Analytics
-- **Daily Spending Line Chart** — smooth bezier curves for the current month via `fl_chart`
-- **Spending Breakdown** — donut-style category breakdown with ranked list
-- **6-Month Trend Bar Chart** — income vs expense comparison across the last 6 months
-- **Month Summary Card** — net income/expense/balance with vs-last-month percentage delta
+- **Net Summary Card** — net balance, income, expenses with surplus/deficit tag
+- **Stat Pills** — Total Spent, Daily Average, Transaction Entries vs last month
+- **Insight Mini-Cards** — Savings Rate %, Projected Monthly Spend, Top Category
+- **Dual-Line Daily Chart** — animated bezier curves showing both Earned & Spent per day with glow effects
+- **6-Month Trend Bar Chart** — green (income) vs red (expense) grouped bars with background tracks
 
 ### 💰 Budget Goals
 - **Gradient summary card** — total spent vs remaining with an animated overall progress bar
@@ -58,9 +139,9 @@ This application is engineered to feel **tactile, alive, and profoundly premium*
 - **Add/Edit sheet** — borderless amount input, iOS-style form rows, haptic feedback throughout
 
 ### ⚙️ Settings & Profile
-- **Gradient profile hero card** with streak badge and initials avatar
+- **Gradient profile hero card** with streak badge and profile photo
 - **Streak & entries stat cards** — gamification layer to build daily habits
-- **Theme switcher** (System / Light / Dark) via `CupertinoSlidingSegmentedControl`
+- **Theme switcher** (System / Light / Dark) via segmented control
 - **Notifications toggle**, **Biometric lock toggle**
 - **CSV export** of all transactions via `ExportService`
 
@@ -74,7 +155,7 @@ This application is engineered to feel **tactile, alive, and profoundly premium*
 | **State Management** | [Riverpod](https://riverpod.dev/) — `StateNotifierProvider`, `Provider`, `StateProvider` |
 | **Local Database** | [Hive](https://docs.hivedb.dev/) — NoSQL TypeAdapters, synchronous reads/writes |
 | **Routing** | [GoRouter](https://pub.dev/packages/go_router) — declarative, deep-linkable |
-| **Charting** | [fl_chart](https://pub.dev/packages/fl_chart) — bezier line charts, bar charts |
+| **Charting** | [fl_chart](https://pub.dev/packages/fl_chart) — bezier line charts, bar charts with animations |
 | **Animations** | `flutter_staggered_animations`, native `AnimationController` + `TweenAnimationBuilder` |
 | **Notifications** | `flutter_local_notifications` + `timezone` |
 | **Security** | `local_auth` biometric lock |
@@ -121,8 +202,8 @@ lib/
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/Deepanshu-ui-dev/Jaypee-Brothers-Assessment.git
-   cd Fintracker
+   git clone https://github.com/Deepanshu-ui-dev/Fintracker.git
+   cd Fintracker/Fintrack-Frontend
    ```
 
 2. **Install dependencies**:
@@ -151,6 +232,20 @@ lib/
 
 ---
 
+## ⬇️ Download
+
+<div align="center">
+  <a href="https://github.com/Deepanshu-ui-dev/Fintracker/releases/download/V1.1.0/FinTrack.apk">
+    <img src="https://img.shields.io/badge/Download%20APK-v1.1.0%20for%20Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+  </a>
+</div>
+
+<br>
+
+> Requires Android 5.0 (API 21) or higher.
+
+---
+
 ## 🔑 Design Tokens
 
 The entire app derives from a single `AppColors` design token class in [`lib/core/constants/app_colors.dart`](lib/core/constants/app_colors.dart) that adapts to dark/light mode automatically:
@@ -171,5 +266,5 @@ All currency formatting is dynamic via `NumExtension.activeCurrencySymbol` — c
 
 <p align="center">
   <b>Developed with ❤️ by Deepanshu Kaushik</b><br>
-  <sub>Jaypee Brothers Assessment — 2026</sub>
+  <sub>FinTrack — 2026</sub>
 </p>

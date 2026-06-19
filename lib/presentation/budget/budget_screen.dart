@@ -50,8 +50,9 @@ class BudgetScreen extends ConsumerWidget {
       backgroundColor: context.colors.pageBg,
       body: budgets.isEmpty && sortedCategories.isEmpty
           ? const _EmptyState()
-          : CustomScrollView(
-              slivers: [
+          : AnimationLimiter(
+              child: CustomScrollView(
+                slivers: [
                 SliverToBoxAdapter(
                   child: _BudgetHeader(
                     monthName: monthName,
@@ -91,9 +92,10 @@ class BudgetScreen extends ConsumerWidget {
                                   onTap: () {
                                     HapticFeedback.lightImpact();
                                     showModalBottomSheet(
-                                      context: ctx,
-                                      backgroundColor: ctx.colors.surface,
+                                      context: context,
+                                      backgroundColor: context.colors.surface,
                                       isScrollControlled: true,
+                                      useRootNavigator: true,
                                       shape: const RoundedRectangleBorder(
                                           borderRadius: BorderRadius.vertical(
                                               top: Radius.circular(28))),
@@ -102,7 +104,7 @@ class BudgetScreen extends ConsumerWidget {
                                         categoryName: cat.name,
                                         categoryIcon: cat.icon,
                                         iconColor: cat.color,
-                                        iconBg: cat.themedBgColor(ctx),
+                                        iconBg: cat.themedBgColor(context),
                                         currentLimit: spendData.limit,
                                       ),
                                     );
@@ -118,6 +120,7 @@ class BudgetScreen extends ConsumerWidget {
                   ),
                 ),
               ],
+              ),
             ),
     );
   }
@@ -275,24 +278,34 @@ class _BudgetHeader extends StatelessWidget {
                     // Progress bar
                     TweenAnimationBuilder<double>(
                       tween: Tween<double>(begin: 0, end: overallPct),
-                      duration: const Duration(milliseconds: 1000),
+                      duration: const Duration(milliseconds: 1500),
                       curve: Curves.easeOutCubic,
                       builder: (_, val, __) => Stack(
                         children: [
                           Container(
-                            height: 8,
+                            height: 14,
                             decoration: BoxDecoration(
-                              color: Colors.white.withAlpha(40),
-                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.white.withAlpha(20),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white.withAlpha(30), width: 1),
                             ),
                           ),
                           FractionallySizedBox(
                             widthFactor: val,
                             child: Container(
-                              height: 8,
+                              height: 14,
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
+                                gradient: const LinearGradient(
+                                  colors: [Colors.white, Color(0xFFF1F5F9)],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withAlpha(60),
+                                    blurRadius: 10,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -448,17 +461,32 @@ class _BudgetCard extends StatelessWidget {
     return BouncingButton(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [
+              context.colors.surface,
+              context.colors.surface.withAlpha(220),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: hasBudget && pct >= 0.85
-                ? progressColor.withAlpha(80)
-                : context.colors.divider.withAlpha(80),
-            width: hasBudget && pct >= 0.85 ? 1.5 : 0.5,
+                ? progressColor.withAlpha(120)
+                : context.colors.divider.withAlpha(50),
+            width: hasBudget && pct >= 0.85 ? 1.5 : 0.8,
           ),
-          boxShadow: context.colors.subtleShadow,
+          boxShadow: [
+            if (hasBudget && pct >= 0.85)
+              BoxShadow(
+                color: progressColor.withAlpha(30),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ...context.colors.subtleShadow,
+          ],
         ),
         child: Column(
           children: [
@@ -605,12 +633,19 @@ class _AnimatedProgressBar extends StatelessWidget {
               child: Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: color,
+                  gradient: LinearGradient(
+                    colors: [
+                      color.withAlpha(180),
+                      color,
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
                       color: color.withAlpha(80),
-                      blurRadius: 6,
+                      blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],

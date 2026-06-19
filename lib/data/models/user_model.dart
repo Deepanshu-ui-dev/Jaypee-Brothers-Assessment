@@ -2,11 +2,15 @@ class UserModel {
   final String name;
   final String currency;
   final String currencySymbol;
+  final String? profession;
+  final String? profileImagePath;
 
   const UserModel({
     required this.name,
-    this.currency = 'NGN',
-    this.currencySymbol = '₦',
+    this.currency = 'INR',
+    this.currencySymbol = '₹',
+    this.profession,
+    this.profileImagePath,
   });
 
   String get initials {
@@ -21,11 +25,15 @@ class UserModel {
     String? name,
     String? currency,
     String? currencySymbol,
+    String? profession,
+    String? profileImagePath,
   }) {
     return UserModel(
       name: name ?? this.name,
       currency: currency ?? this.currency,
       currencySymbol: currencySymbol ?? this.currencySymbol,
+      profession: profession ?? this.profession,
+      profileImagePath: profileImagePath ?? this.profileImagePath,
     );
   }
 
@@ -33,11 +41,15 @@ class UserModel {
         'name': name,
         'currency': currency,
         'currencySymbol': currencySymbol,
+        'profession': profession,
+        'profileImagePath': profileImagePath,
       };
 
   factory UserModel.fromMap(Map<String, dynamic> map) => UserModel(
         name: map['name'] as String? ?? 'User',
-        currency: map['currency'] as String? ?? 'NGN',
-        currencySymbol: map['currencySymbol'] as String? ?? '₦',
+        currency: map['currency'] as String? ?? 'INR',
+        currencySymbol: map['currencySymbol'] as String? ?? '₹',
+        profession: map['profession'] as String?,
+        profileImagePath: map['profileImagePath'] as String?,
       );
 }

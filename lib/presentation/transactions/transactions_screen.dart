@@ -179,7 +179,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                         return AnimationLimiter(
                           child: ListView.builder(
                             padding:
-                                const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                                const EdgeInsets.fromLTRB(16, 12, 16, 24),
                             itemCount: sortedDates.length,
                             itemBuilder: (_, i) {
                               final date = sortedDates[i];
@@ -230,17 +230,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                             ],
                                           ),
                                         ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: context.colors.surface,
-                                            borderRadius:
-                                                BorderRadius.circular(16),
-                                            border: Border.all(
-                                              color: context.colors.divider
-                                                  .withAlpha(128),
-                                              width: 1,
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: context.colors.surface,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                color: context.colors.divider
+                                                    .withAlpha(80),
+                                                width: 1,
+                                              ),
+                                              boxShadow: context.colors.subtleShadow,
                                             ),
-                                          ),
                                           child: Column(
                                             children: txns
                                                 .asMap()

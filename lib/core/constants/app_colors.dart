@@ -1,101 +1,77 @@
 import 'package:flutter/material.dart';
 export '../extensions/context_extension.dart';
+export 'app_text_styles.dart';
 
-/// All color constants for FinTrack design system.
 class AppColors {
   final bool isDark;
   const AppColors(this.isDark);
 
-  // Surfaces
-  Color get surface       => isDark ? const Color(0xFF18181B) : const Color(0xFFFFFFFF);
-  Color get surfaceSubtle => isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
-  Color get pageBg        => isDark ? const Color(0xFF09090B) : const Color(0xFFFAFAFA);
-  Color get divider       => isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+  Color get pageBg => isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA);
+  Color get surface => isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFFFF);
+  Color get surfaceSubtle => isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF1F3F5);
+  Color get surfaceGlass => isDark ? const Color(0xFF1E1E1E).withValues(alpha: 0.8) : const Color(0xFFFFFFFF).withValues(alpha: 0.8);
 
-  // Text
-  Color get textPrimary   => isDark ? const Color(0xFFFAFAFA) : const Color(0xFF18181B);
-  Color get textSecondary => isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-  Color get textMuted     => isDark ? const Color(0xFF71717A) : const Color(0xFFA1A1AA);
+  Color get primary => const Color(0xFF6366F1); // Indigo 500
+  Color get primaryDark => const Color(0xFF4F46E5); // Indigo 600
+  Color get secondary => const Color(0xFF14B8A6); // Teal
 
-  // Primary Branding (Electric Violet & Blue)
-  Color get primary       => const Color(0xFF7C3AED); // Vibrant Violet
-  Color get primaryDark   => const Color(0xFF5B21B6); 
-  Color get secondary     => const Color(0xFF3B82F6); // Electric Blue
+  Color get textPrimary => isDark ? const Color(0xFFF8F9FA) : const Color(0xFF212529);
+  Color get textSecondary => isDark ? const Color(0xFFCED4DA) : const Color(0xFF495057);
+  Color get textMuted => isDark ? const Color(0xFF6C757D) : const Color(0xFFADB5BD);
 
-  // Action / Ink
-  Color get ink           => isDark ? const Color(0xFFFAFAFA) : const Color(0xFF18181B);
-  Color get onInk         => isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+  Color get divider => isDark ? const Color(0xFF343A40) : const Color(0xFFDEE2E6);
+
+  Color get incomeGreen => const Color(0xFF10B981);
+  Color get expenseRed => const Color(0xFFEF4444);
   
-  // Semantic
-  Color get onPrimary     => Colors.white;
-  Color get incomeGreen   => const Color(0xFF10B981); // Emerald
-  Color get incomeBg      => isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5);
-  Color get expenseRed    => const Color(0xFFF43F5E); // Rose
-  Color get expenseBg     => isDark ? const Color(0xFF881337) : const Color(0xFFFFE4E6);
+  Color get incomeBg => isDark ? const Color(0xFF10B981).withValues(alpha: 0.1) : const Color(0xFF10B981).withValues(alpha: 0.1);
+  Color get expenseBg => isDark ? const Color(0xFFEF4444).withValues(alpha: 0.1) : const Color(0xFFEF4444).withValues(alpha: 0.1);
 
-  // Category Base Tints (solid colors)
-  Color get categoryFood      => const Color(0xFFF59E0B); // Amber
-  Color get categoryTransport => const Color(0xFF3B82F6); // Blue
-  Color get categoryGrocery   => const Color(0xFF10B981); // Emerald
-  Color get categoryShopping  => const Color(0xFFEC4899); // Pink
-  Color get categoryElectricity => const Color(0xFFF43F5E); // Rose
-  Color get categoryData      => const Color(0xFF8B5CF6); // Violet
-  Color get categoryOthers    => const Color(0xFF64748B); // Slate
+  Color get ink => isDark ? const Color(0xFFF8F9FA) : const Color(0xFF212529);
+  Color get onInk => isDark ? const Color(0xFF212529) : const Color(0xFFF8F9FA);
 
-  // Feature specific
-  Color get balanceCardBg     => const Color(0xFF7C3AED);
-  Color get balanceCardText   => Colors.white;
-  Color get insightBannerBg   => isDark ? const Color(0xFF1E1B4B) : const Color(0xFFEDE9FE);
-  Color get insightBannerText => isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9);
+  // Category Tints
+  Color get tintFood => const Color(0xFFF97316);
+  Color get tintTransport => const Color(0xFF3B82F6);
+  Color get tintShopping => const Color(0xFFEAB308);
+  Color get tintPurple => const Color(0xFFA855F7);
+  Color get tintHealth => const Color(0xFFEF4444);
+  Color get tintEducation => const Color(0xFF8B5CF6);
+  Color get tintSoftware => const Color(0xFF06B6D4);
+  Color get tintGray => const Color(0xFF6B7280);
+  Color get tintPink => const Color(0xFFEC4899);
 
-  // Modern UI Glass/Gradients
-  Color get surfaceGlass  => isDark ? const Color(0x9918181B) : const Color(0xCCFFFFFF);
-  Color get bottomNavGlass => isDark ? const Color(0xE609090B) : const Color(0xF2FFFFFF);
-  
-  // Premium Glow Shadows
-  List<BoxShadow> get primaryGlow => [
-    BoxShadow(
-      color: primary.withAlpha(isDark ? 80 : 100),
-      blurRadius: 32,
-      offset: const Offset(0, 12),
-    ),
-    BoxShadow(
-      color: secondary.withAlpha(isDark ? 40 : 60),
-      blurRadius: 16,
-      offset: const Offset(-8, 8),
-    ),
-  ];
+  // Category Colors
+  Color get categoryShopping => const Color(0xFFEAB308);
+  Color get categoryData => const Color(0xFF3B82F6);
+  Color get categoryFood => const Color(0xFFF97316);
+  Color get categoryTransport => const Color(0xFF3B82F6);
+  Color get categoryGrocery => const Color(0xFF22C55E);
+  Color get categoryOthers => const Color(0xFF6B7280);
 
-  List<BoxShadow> get subtleShadow => [
-    BoxShadow(
-      color: isDark ? Colors.black.withAlpha(200) : const Color(0xFF71717A).withAlpha(15),
-      blurRadius: 24,
-      offset: const Offset(0, 8),
-    )
-  ];
+  // Insights
+  Color get insightBannerBg => isDark ? const Color(0xFF1E3A8A) : const Color(0xFFDBEAFE);
+  Color get insightBannerText => isDark ? const Color(0xFFDBEAFE) : const Color(0xFF1E3A8A);
 
   LinearGradient get balanceCardGradient => const LinearGradient(
-    colors: [Color(0xFF8B5CF6), Color(0xFF3B82F6)], // Violet to Blue
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+        colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
 
-  LinearGradient get secondaryGradient => const LinearGradient(
-    colors: [Color(0xFFF43F5E), Color(0xFFF97316)], // Rose to Orange
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  List<BoxShadow> get subtleShadow => [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        )
+      ];
 
-  // Category background tints (reactive glass-like)
-  Color get tintFood       => isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7);
-  Color get tintTransport  => isDark ? const Color(0xFF172554) : const Color(0xFFDBEAFE);
-  Color get tintShopping   => isDark ? const Color(0xFF831843) : const Color(0xFFFCE7F3);
-  Color get tintElec       => isDark ? const Color(0xFF4C0519) : const Color(0xFFFFE4E6);
-  Color get tintData       => isDark ? const Color(0xFF2E1065) : const Color(0xFFF3E8FF);
-  Color get tintSoftware   => isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5);
-  Color get tintHealth     => isDark ? const Color(0xFF4C0519) : const Color(0xFFFFE4E6);
-  Color get tintEducation  => isDark ? const Color(0xFF172554) : const Color(0xFFDBEAFE);
-  Color get tintPink       => isDark ? const Color(0xFF831843) : const Color(0xFFFCE7F3);
-  Color get tintPurple     => isDark ? const Color(0xFF2E1065) : const Color(0xFFF3E8FF);
-  Color get tintGray       => isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+  List<BoxShadow> get primaryGlow => [
+        BoxShadow(
+          color: primary.withValues(alpha: 0.4),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        )
+      ];
 }

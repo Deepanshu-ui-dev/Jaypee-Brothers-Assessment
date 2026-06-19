@@ -9,6 +9,8 @@ import '../../data/models/category_model.dart';
 import '../../providers/budget_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/transaction_provider.dart';
+import '../../data/services/notification_service.dart';
+import 'package:collection/collection.dart';
 import '../categories/add_category_sheet.dart';
 import '../../core/widgets/bottom_padding.dart';
 import '../../core/widgets/bouncing_button.dart';
@@ -159,6 +161,18 @@ class _AddEditTransactionSheetState
       } else {
         await notifier.add(txn);
       }
+      
+      if (txn.isExpense) {
+        final alerts = ref.read(budgetAlertsProvider);
+        final alert = alerts.firstWhereOrNull((a) => a.categoryId == txn.categoryId);
+        if (alert != null) {
+          NotificationService.showBudgetAlert(
+            'Budget Alert ⚠️', 
+            'You have reached ${(alert.pct * 100).toStringAsFixed(0)}% of your ${txn.categoryName} budget!'
+          );
+        }
+      }
+
       if (mounted) {
         HapticFeedback.mediumImpact();
         navigator.pop();
@@ -390,37 +404,46 @@ class _AddEditTransactionSheetState
     required Widget trailing,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: iconColor.withAlpha(20),
-                borderRadius: BorderRadius.circular(10),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: context.colors.subtleShadow,
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconColor.withAlpha(20),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 22, color: iconColor),
               ),
-              child: Icon(icon, size: 20, color: iconColor),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: context.textStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
-                color: context.colors.textPrimary,
+              const SizedBox(width: 14),
+              Text(
+                title,
+                style: context.textStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textPrimary,
+                ),
               ),
-            ),
-            const Spacer(),
-            trailing,
-            const SizedBox(width: 4),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: context.colors.textMuted,
-            ),
-          ],
+              const Spacer(),
+              trailing,
+              const SizedBox(width: 6),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: context.colors.textMuted,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -434,44 +457,52 @@ class _AddEditTransactionSheetState
     required TextEditingController controller,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconColor.withAlpha(20),
-              borderRadius: BorderRadius.circular(10),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: context.colors.subtleShadow,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withAlpha(20),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 22, color: iconColor),
             ),
-            child: Icon(icon, size: 20, color: iconColor),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: context.textStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-              color: context.colors.textPrimary,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: TextFormField(
-              controller: controller,
-              textAlign: TextAlign.end,
-              style: context.textStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
-              decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: context.textStyles.bodyMedium.copyWith(
-                  color: context.colors.textMuted,
-                ),
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
+            const SizedBox(width: 14),
+            Text(
+              title,
+              style: context.textStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+                color: context.colors.textPrimary,
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: TextFormField(
+                controller: controller,
+                textAlign: TextAlign.end,
+                style: context.textStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: context.textStyles.bodyMedium.copyWith(
+                    color: context.colors.textMuted,
+                  ),
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -728,105 +759,91 @@ class _AddEditTransactionSheetState
                   ),
                   const SizedBox(height: 28),
 
-                  // ── Grouped Form Container ─────────────────────────────────
-                  Container(
-                    decoration: BoxDecoration(
-                      color: context.colors.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: context.colors.divider,
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        // Category Selection Row
-                        _buildFormRow(
-                          icon: Icons.grid_view_rounded,
-                          iconColor: context.colors.primary,
-                          title: 'Category',
-                          trailing: _selectedCategory != null
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: _selectedCategory!.themedBgColor(context),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        _selectedCategory!.icon,
-                                        color: _selectedCategory!.color,
-                                        size: 16,
-                                      ),
+                  // ── Form Cards ─────────────────────────────────
+                  Column(
+                    children: [
+                      // Category Selection Row
+                      _buildFormRow(
+                        icon: Icons.grid_view_rounded,
+                        iconColor: context.colors.primary,
+                        title: 'Category',
+                        trailing: _selectedCategory != null
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: _selectedCategory!.themedBgColor(context),
+                                      shape: BoxShape.circle,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      _selectedCategory!.name,
-                                      style: context.textStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                                    child: Icon(
+                                      _selectedCategory!.icon,
+                                      color: _selectedCategory!.color,
+                                      size: 16,
                                     ),
-                                  ],
-                                )
-                              : Text(
-                                  'Select Category',
-                                  style: context.textStyles.bodyMedium.copyWith(
-                                    color: context.colors.textSecondary,
                                   ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _selectedCategory!.name,
+                                    style: context.textStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                'Select Category',
+                                style: context.textStyles.bodyMedium.copyWith(
+                                  color: context.colors.textSecondary,
                                 ),
-                          onTap: () => _showCategoryPicker(context, categories),
-                        ),
-                        _buildDivider(),
+                              ),
+                        onTap: () => _showCategoryPicker(context, categories),
+                      ),
 
-                        // Date Selection Row
-                        _buildFormRow(
-                          icon: Icons.calendar_today_rounded,
-                          iconColor: Colors.orange,
-                          title: 'Date',
-                          trailing: Text(
-                            DateFormat("MMM d, yyyy 'at' h:mm a").format(_date),
-                            style: context.textStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                      // Date Selection Row
+                      _buildFormRow(
+                        icon: Icons.calendar_today_rounded,
+                        iconColor: Colors.orange,
+                        title: 'Date',
+                        trailing: Text(
+                          DateFormat("MMM d, yyyy 'at' h:mm a").format(_date),
+                          style: context.textStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        onTap: _pickDate,
+                      ),
+
+                      // Payment Method Row
+                      _buildFormRow(
+                        icon: Icons.credit_card_rounded,
+                        iconColor: Colors.blue,
+                        title: 'Payment',
+                        trailing: Text(
+                          _paymentMethod ?? 'Select Method',
+                          style: context.textStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: _paymentMethod == null ? context.colors.textSecondary : null,
                           ),
-                          onTap: _pickDate,
                         ),
-                        _buildDivider(),
+                        onTap: () => _showPaymentMethodPicker(context),
+                      ),
 
-                        // Payment Method Row
-                        _buildFormRow(
-                          icon: Icons.credit_card_rounded,
-                          iconColor: Colors.blue,
-                          title: 'Payment',
-                          trailing: Text(
-                            _paymentMethod ?? 'Select Method',
-                            style: context.textStyles.bodyMedium.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: _paymentMethod == null ? context.colors.textSecondary : null,
-                            ),
-                          ),
-                          onTap: () => _showPaymentMethodPicker(context),
-                        ),
-                        _buildDivider(),
+                      // Note Input Row
+                      _buildInputRow(
+                        icon: Icons.edit_note_rounded,
+                        iconColor: Colors.teal,
+                        title: 'Note',
+                        hintText: 'What was this for?',
+                        controller: _noteCtrl,
+                      ),
 
-                        // Note Input Row
-                        _buildInputRow(
-                          icon: Icons.edit_note_rounded,
-                          iconColor: Colors.teal,
-                          title: 'Note',
-                          hintText: 'What was this for?',
-                          controller: _noteCtrl,
-                        ),
-                        _buildDivider(),
-
-                        // Receipt Number Row
-                        _buildInputRow(
-                          icon: Icons.receipt_long_rounded,
-                          iconColor: Colors.purple,
-                          title: 'Receipt',
-                          hintText: 'Optional number',
-                          controller: _receiptCtrl,
-                        ),
-                      ],
-                    ),
+                      // Receipt Number Row
+                      _buildInputRow(
+                        icon: Icons.receipt_long_rounded,
+                        iconColor: Colors.purple,
+                        title: 'Receipt',
+                        hintText: 'Optional number',
+                        controller: _receiptCtrl,
+                      ),
+                    ],
                   ),
 
                   // Budget Alert Banner
@@ -890,14 +907,26 @@ class _AddEditTransactionSheetState
                       width: double.infinity,
                       height: 54,
                       decoration: BoxDecoration(
-                        color: accentColor,
+                        gradient: isIncome
+                            ? LinearGradient(
+                                colors: [accentColor, accentColor.withAlpha(200)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : context.colors.balanceCardGradient,
                         borderRadius: BorderRadius.circular(27),
                         boxShadow: [
                           BoxShadow(
-                            color: accentColor.withAlpha(60),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
+                            color: (isIncome ? accentColor : context.colors.primary).withAlpha(80),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
                           ),
+                          if (!isIncome)
+                            BoxShadow(
+                              color: context.colors.secondary.withAlpha(50),
+                              blurRadius: 10,
+                              offset: const Offset(-4, 4),
+                            ),
                         ],
                       ),
                       alignment: Alignment.center,

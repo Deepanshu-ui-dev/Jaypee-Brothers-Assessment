@@ -19,7 +19,7 @@ class NotificationService {
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-    final linuxSettings = LinuxInitializationSettings(
+    const linuxSettings = LinuxInitializationSettings(
       defaultActionName: 'Open notification',
     );
 
@@ -66,6 +66,27 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  static Future<void> showBudgetAlert(String title, String body) async {
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'fintrack_budget',
+        'Budget Alerts',
+        channelDescription: 'Notifications for budget limits',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+      ),
+      iOS: DarwinNotificationDetails(),
+    );
+
+    await _plugin.show(
+      DateTime.now().millisecond,
+      title,
+      body,
+      details,
     );
   }
 

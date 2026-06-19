@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/breakpoints.dart';
@@ -115,168 +117,203 @@ class DashboardScreen extends ConsumerWidget {
   Widget _buildMobile(BuildContext context, dynamic user) {
     return Scaffold(
       backgroundColor: context.colors.pageBg,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => context.go('/settings'),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: context.colors.primary.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                              color: context.colors.primary
-                                  .withValues(alpha: 0.2),
-                              width: 1.5),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          user?.initials ?? 'U',
-                          style: context.textStyles.heading.copyWith(
-                            color: context.colors.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+      body: AnimationLimiter(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => context.go('/settings'),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: context.colors.primary.withValues(alpha: 0.15),
+                                    shape: BoxShape.circle,
+                            border: Border.all(
+                                color: Colors.white.withAlpha(80), width: 2),
+                            image: user?.profileImagePath != null
+                                ? DecorationImage(
+                                    image: FileImage(File(user!.profileImagePath!)),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Hello 👋',
-                              style: context.textStyles.caption.copyWith(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500)),
-                          const SizedBox(height: 2),
-                          Text(
-                            user != null
-                                ? user.name.split(' ').first
-                                : 'User',
-                            style: context.textStyles.heading
-                                .copyWith(fontSize: 18),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => context.push('/notifications'),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: context.colors.surface,
-                          border: Border.all(
-                              color: context.colors.divider, width: 0.5),
-                        ),
-                        child: Stack(
                           alignment: Alignment.center,
+                          child: user?.profileImagePath == null
+                              ? Text(
+                                  user?.initials ?? 'U',
+                                  style: context.textStyles.heading.copyWith(
+                                      fontSize: 28, color: Colors.white),
+                              )
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.notifications_none_rounded,
-                                color: context.colors.textPrimary, size: 22),
-                            Positioned(
-                              top: 12,
-                              right: 12,
-                              child: Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  color: context.colors.primary,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: context.colors.surface,
-                                      width: 1.5),
-                                ),
-                              ),
-                            )
+                            Text('Hello 👋',
+                                style: context.textStyles.caption.copyWith(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 4),
+                            Text(
+                              user != null
+                                  ? user.name.split(' ').first
+                                  : 'User',
+                              style: context.textStyles.heading
+                                  .copyWith(fontSize: 20),
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                      GestureDetector(
+                        onTap: () => context.push('/notifications'),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: context.colors.surface,
+                            border: Border.all(
+                                color: context.colors.divider, width: 0.5),
+                            boxShadow: context.colors.subtleShadow,
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Icon(Icons.notifications_none_rounded,
+                                  color: context.colors.textPrimary, size: 24),
+                              Positioned(
+                                top: 12,
+                                right: 14,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: context.colors.primary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: context.colors.surface,
+                                        width: 1.5),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                const BalanceCard(),
-                const SizedBox(height: 16),
-                const DailyInsightBanner(),
-                const BudgetAlertBanner(),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Browse Category',
-                        style: context.textStyles.subheading),
-                    Row(
-                      children: [
-                        Container(
-                            width: 12,
-                            height: 4,
-                            decoration: BoxDecoration(
-                                color: context.colors.primary,
-                                borderRadius: BorderRadius.circular(2))),
-                        const SizedBox(width: 4),
-                        Container(
-                            width: 4,
-                            height: 4,
-                            decoration: BoxDecoration(
-                                color: context.colors.textMuted.withAlpha(50),
-                                borderRadius: BorderRadius.circular(2))),
-                      ],
-                    )
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ]),
-            ),
-          ),
-          const SliverToBoxAdapter(child: BrowseCategories()),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Recent Transactions',
-                        style: context.textStyles.subheading),
-                    TextButton(
-                      onPressed: () => context.go('/transactions'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: context.colors.primary,
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text('See All',
-                          style: context.textStyles.bodyMedium
-                              .copyWith(color: context.colors.primary)),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(
+                  AnimationConfiguration.toStaggeredList(
+                    duration: const Duration(milliseconds: 500),
+                    childAnimationBuilder: (widget) => SlideAnimation(
+                      verticalOffset: 50.0,
+                      child: FadeInAnimation(child: widget),
                     ),
-                  ],
+                    children: [
+                      const BalanceCard(),
+                      const SizedBox(height: 20),
+                      const DailyInsightBanner(),
+                      const BudgetAlertBanner(),
+                      const SizedBox(height: 36),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Browse Category',
+                              style: context.textStyles.subheading),
+                          Row(
+                            children: [
+                              Container(
+                                  width: 12,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                      color: context.colors.primary,
+                                      borderRadius: BorderRadius.circular(2))),
+                              const SizedBox(width: 4),
+                              Container(
+                                  width: 4,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                      color: context.colors.textMuted.withAlpha(50),
+                                      borderRadius: BorderRadius.circular(2))),
+                            ],
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
-                const RecentTransactions(),
-                const BottomPadding(minimum: 120),
-              ]),
+              ),
             ),
-          ),
-        ],
+            SliverToBoxAdapter(
+              child: AnimationConfiguration.staggeredList(
+                position: 5,
+                duration: const Duration(milliseconds: 500),
+                child: const SlideAnimation(
+                  verticalOffset: 50.0,
+                  child: FadeInAnimation(
+                    child: BrowseCategories(),
+                  ),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(
+                  AnimationConfiguration.toStaggeredList(
+                    duration: const Duration(milliseconds: 500),
+                    childAnimationBuilder: (widget) => SlideAnimation(
+                      verticalOffset: 50.0,
+                      child: FadeInAnimation(child: widget),
+                    ),
+                    children: [
+                      const SizedBox(height: 36),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Recent Transactions',
+                              style: context.textStyles.subheading),
+                          TextButton(
+                            onPressed: () => context.go('/transactions'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: context.colors.primary,
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text('See All',
+                                style: context.textStyles.bodyMedium
+                                    .copyWith(color: context.colors.primary)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const RecentTransactions(),
+                      const BottomPadding(minimum: 140),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
